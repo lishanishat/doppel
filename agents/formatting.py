@@ -45,7 +45,11 @@ def _input_line(inp: dict) -> str:
 
 def verdict_text(evidence: dict, review_url: str | None = None) -> str:
     v = evidence.get("verdict", "UNPROVEN")
-    lines = [f"{_ICON.get(v, '')} **{v}**: {evidence.get('reason', '')}"]
+    if v == "VERIFIED":
+        lines = [f"{_ICON.get(v, '')} **VERIFIED on {evidence.get('n_inputs', 0)} inputs**: all three versions agree "
+                 "and every active rule holds. This is evidence on the inputs tested, not a proof of correctness."]
+    else:
+        lines = [f"{_ICON.get(v, '')} **{v}**: {evidence.get('reason', '')}"]
 
     ce = evidence.get("counterexample")
     q = evidence.get("question")
@@ -64,8 +68,6 @@ def verdict_text(evidence: dict, review_url: str | None = None) -> str:
             if name in q["options"]:
                 lines.append(f"{i}. {_LABEL[name]} says {_val(q['options'][name])}")
         lines.append("Reply answer 1, answer 2 or answer 3.")
-    elif v == "VERIFIED":
-        lines.append(f"{evidence.get('n_inputs', 0)} inputs checked, all three versions agree.")
 
     if review_url:
         lines.append(f"Review: {review_url}")

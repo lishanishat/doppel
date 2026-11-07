@@ -10,9 +10,13 @@
 - Replies to `verify pr #2` and `verify mutant #17` arrive within about a minute. Errors come back as clean
   messages, never crashes.
 
-## Still to measure
-- Does ASI:One show a second (follow-up) message after the first "running..." reply?
-- How long does ASI:One wait for a reply before giving up?
+## Measured (real engine, DOPPEL_STUBS=0, 2:25 pm)
+- **A second (follow-up) message works.** One command produced an acknowledgement ("Got it. Verifying ...")
+  and then the verdict as a separate message.
+- `verify pr #2` end to end: acknowledgement after about 5-10 s (GitHub fetches happen before it), then
+  VERIFIED on 285 inputs; the verdict itself takes under 1 s with cached twins. A GitHub review is posted and
+  ASI:One renders a link card for it.
+- Not yet measured: how long ASI:One waits before giving up on a slow reply (runs are far shorter than that).
 
 ## Gotchas
 - `docs.google.com` Fetch docs and Meta cookbook aside, Meta's model is a reasoning model: tiny `max_tokens`
