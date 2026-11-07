@@ -51,6 +51,12 @@ def test_decide():
     ans = {qid: {"expected": ok("15.00"), "chosen": "pr"}}
     assert d(rr([three]), [], {}, None, answered=ans)[0] == "VERIFIED"
     assert d(rr(), [], {}, None, regression_failures=[{"input": INP}])[0] == "BLOCKED"
+    # saved answer choosing the PR's output overrides a later 2-1 against the PR on that input
+    two = ce("2-1", [ok("15.00"), ok("14.00"), ok("14.00")], ["twin_a", "twin_b"])
+    assert d(rr([two]), [], {}, None, answered=ans)[0] == "VERIFIED"
+    # unquoted rule -> advisory, not a crash
+    r = rules.evaluate("prorate_refund", [{"input": INP, "outputs": {n: ok("99.00") for n in ("pr", "twin_a", "twin_b")}}], spec="")
+    assert all(x["status"] == "advisory" and x["spec_line"] is None for x in r)
 
 
 def test_rules():

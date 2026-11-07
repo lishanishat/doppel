@@ -39,6 +39,9 @@ def decide(referee_result, rule_results, build_errors, scope_error,
     confirmed = rr.get("confirmed", [])
     # 1. PR outvoted 2-1
     for ce in confirmed:
+        a = answered.get(question_id(ce["input"]))
+        if a and _same(ce["outputs"]["pr"], a["expected"]):
+            continue  # a saved spec answer says the PR's output is the intended one
         if ce["vote"] == "2-1" and "pr" not in ce["majority"]:
             return ("BLOCKED", f"PR outvoted 2-1 by {' and '.join(ce['majority'])} on a confirmed input.", ce, None)
     # answered 1-1-1 questions: the saved answer is the expected value

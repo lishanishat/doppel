@@ -92,8 +92,7 @@ def evaluate(fn: str, samples: list[dict], versions_outputs: Optional[dict] = No
     spec = spec if spec is not None else spec_text(fn)
     out = []
     for rule in RULES.get(fn, []):
-        quoted = rule.spec_line in spec
-        assert quoted, f"rule {rule.name}: spec line not found in spec.md: {rule.spec_line!r}"
+        quoted = rule.spec_line in spec  # not quoted verbatim -> advisory, never blocks
         held = {"pr": True, "twin_a": True, "twin_b": True}
         for i, s in enumerate(samples):
             kw, outs = _sample_parts(s)
