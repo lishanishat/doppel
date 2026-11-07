@@ -49,6 +49,7 @@ def main(argv=None) -> int:
     v.add_argument("--seed", type=int, default=0)
     v.add_argument("--max-examples", type=int, default=2000)
     v.add_argument("--time-budget", type=float, default=60)
+    v.add_argument("--chaos", choices=["pr", "twin_a", "twin_b"], help="recovery demo: kill this version's process mid-run")
     a = ap.parse_args(argv)
     os.environ["DOPPEL_STUBS"] = "0"
     sys.path.insert(0, str(ROOT))
@@ -65,6 +66,12 @@ def main(argv=None) -> int:
     req = {"function_name": a.fn, "spec_text": spec, "seed": a.seed, "max_examples": a.max_examples,
            "time_budget_s": a.time_budget, "pr_ref": str(a.pr),
            "versions": [mk("pr", a.pr, "claude-code", None), mk("twin_a", pa, ta, None), mk("twin_b", pb, tb, None)]}
+    if a.chaos:
+        from engine.chaos import inject_kill
+        for v_ in req["versions"]:
+            if v_["name"] == a.chaos:
+                v_["code"] = inject_kill(v_["code"], entry)
+        print(f"[chaos] {a.chaos} will be killed mid-run", file=sys.stderr)
     ev = api.verify(req)
     print(json.dumps(ev, indent=2))
     print()
