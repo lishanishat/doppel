@@ -23,7 +23,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.5906040668487549
+    "secs": 0.33858203887939453
    },
    "pr_tests": {
     "caught": false,
@@ -42,7 +42,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.29337096214294434
+    "secs": 0.27846503257751465
    },
    "pr_tests": {
     "caught": true,
@@ -61,7 +61,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.319033145904541
+    "secs": 0.28125905990600586
    },
    "pr_tests": {
     "caught": true,
@@ -80,7 +80,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.39344120025634766
+    "secs": 0.2055370807647705
    },
    "pr_tests": {
     "caught": true,
@@ -99,7 +99,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.9756059646606445
+    "secs": 0.9245259761810303
    },
    "pr_tests": {
     "caught": true,
@@ -118,7 +118,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.9585340023040771
+    "secs": 0.9411349296569824
    },
    "pr_tests": {
     "caught": true,
@@ -137,7 +137,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.2496781349182129
+    "secs": 0.22621703147888184
    },
    "pr_tests": {
     "caught": true,
@@ -156,7 +156,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.25898003578186035
+    "secs": 0.2831289768218994
    },
    "pr_tests": {
     "caught": true,
@@ -175,7 +175,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.2648801803588867
+    "secs": 0.2549619674682617
    },
    "pr_tests": {
     "caught": false,
@@ -194,7 +194,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.28742098808288574
+    "secs": 0.26909804344177246
    },
    "pr_tests": {
     "caught": true,
@@ -213,7 +213,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.247575044631958
+    "secs": 0.23576092720031738
    },
    "pr_tests": {
     "caught": true,
@@ -232,7 +232,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.23749089241027832
+    "secs": 0.20755887031555176
    },
    "pr_tests": {
     "caught": true,
@@ -251,7 +251,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.2407212257385254
+    "secs": 0.21947717666625977
    },
    "pr_tests": {
     "caught": true,
@@ -270,7 +270,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.9393999576568604
+    "secs": 1.1265571117401123
    },
    "pr_tests": {
     "caught": true,
@@ -289,7 +289,7 @@
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 0.39745306968688965
+    "secs": 0.3022780418395996
    },
    "pr_tests": {
     "caught": true,
@@ -318,17 +318,17 @@
  "false_alarm": {
   "verdict": "VERIFIED",
   "reason": "VERIFIED on 924 inputs: all versions agree and all active rules hold.",
-  "secs": 0.677642822265625
+  "secs": 0.7589859962463379
  },
  "pr_on_reference": {
   "caught": true,
   "status": "failed",
-  "detail": "1 failed, 19 passed in 0.29s"
+  "detail": "1 failed, 19 passed in 0.17s"
  },
  "llm_on_reference": {
   "caught": true,
   "status": "failed",
-  "detail": "1 failed, 77 passed in 0.45s"
+  "detail": "1 failed, 77 passed in 0.09s"
  },
  "test_counts": {
   "pr_tests": {
