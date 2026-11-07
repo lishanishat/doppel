@@ -1,108 +1,70 @@
-# model: meta/muse-wonder-1.0
+# model: gemini/gemini-3-flash-preview
 # prompt_sha256: a7f280c0d46490accfae019f16a9031d15566696be0cc5ca5f553f079acd1a1b
-# generated_utc: 2026-11-07T22:01:59Z
+# generated_utc: 2026-11-07T23:39:56Z
 from datetime import date, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 
-
 def prorate_refund(price: str, period_start: str, period_end: str, cancel_date: str) -> str:
-    if not isinstance(price, str):
-        raise ValueError("invalid price")
-    if price == "":
-        raise ValueError("invalid price")
-
-    dot_seen = False
-    digits_before_dot = 0
-    digits_after_dot = 0
-    digits_seen = 0
-    for ch in price:
-        if ch == ".":
-            if dot_seen:
-                raise ValueError("invalid price")
-            dot_seen = True
-        elif ch >= "0" and ch <= "9":
-            digits_seen += 1
-            if dot_seen:
-                digits_after_dot += 1
-            else:
-                digits_before_dot += 1
-        else:
-            raise ValueError("invalid price")
-
-    if digits_seen == 0:
-        raise ValueError("invalid price")
-    if digits_before_dot == 0:
-        raise ValueError("invalid price")
-    if dot_seen and digits_after_dot == 0:
-        raise ValueError("invalid price")
-    if dot_seen and digits_after_dot > 2:
-        raise ValueError("invalid price")
-
+    """
+    Refund the unused part of a billing period when a customer cancels.
+    Iterates day by day to calculate total and used days.
+    """
+    # Validate price
     try:
-        price_value = Decimal(price)
+        d_price = Decimal(price)
     except Exception:
-        raise ValueError("invalid price")
-
-    if price_value < Decimal("0"):
-        raise ValueError("invalid price")
-
-    def parse_date(value):
-        if not isinstance(value, str):
-            raise ValueError("invalid date")
-        if len(value) != 10:
-            raise ValueError("invalid date")
-        if value[4] != "-":
-            raise ValueError("invalid date")
-        if value[7] != "-":
-            raise ValueError("invalid date")
-        index = 0
-        for ch in value:
-            if index == 4 or index == 7:
-                index += 1
-                continue
-            if ch < "0" or ch > "9":
-                raise ValueError("invalid date")
-            index += 1
-        year_text = value[0:4]
-        month_text = value[5:7]
-        day_text = value[8:10]
-        try:
-            parsed = date(int(year_text), int(month_text), int(day_text))
-        except Exception:
-            raise ValueError("invalid date")
-        return parsed
-
-    start_day = parse_date(period_start)
-    end_day = parse_date(period_end)
-    cancel_day = parse_date(cancel_date)
-
-    if end_day <= start_day:
-        raise ValueError("period_end must be after period_start")
-
+        raise ValueError("Malformed price string.")
+    
+    if d_price < 0:
+        raise ValueError("Price cannot be negative.")
+    
+    # Check for more than 2 decimal places in the price string
+    if "." in price:
+        if len(price.split(".")[1]) > 2:
+            raise ValueError("Price cannot have more than 2 decimal places.")
+            
+    # Validate dates
+    try:
+        d_start = date.fromisoformat(period_start)
+        d_end = date.fromisoformat(period_end)
+        d_cancel = date.fromisoformat(cancel_date)
+    except Exception:
+        raise ValueError("Malformed date string.")
+        
+    if d_end <= d_start:
+        raise ValueError("period_end must be after period_start.")
+        
+    # Rule 3: cancel_date on or after period_end
+    if d_cancel >= d_end:
+        return "0.00"
+        
+    # Rule 4: cancel_date before period_start
+    if d_cancel < d_start:
+        return format(d_price.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP), ".2f")
+        
+    # Rule 1: Calculate total_days by iterating day by day
     total_days = 0
-    used_days = 0
-    unused_days = 0
-    one_day = timedelta(days=1)
-    current_day = start_day
-    while current_day < end_day:
+    curr = d_start
+    while curr < d_end:
         total_days += 1
-        if current_day <= cancel_day:
-            used_days += 1
-        else:
-            unused_days += 1
-        current_day = current_day + one_day
-
-    if total_days == 0:
-        raise ValueError("period_end must be after period_start")
-
-    refund_value = price_value * Decimal(unused_days) / Decimal(total_days)
-    refund_rounded = refund_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-
-    if refund_rounded < Decimal("0.00"):
-        refund_rounded = Decimal("0.00")
-
-    full_price_rounded = price_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    if refund_rounded > full_price_rounded:
-        refund_rounded = full_price_rounded
-
-    return str(refund_rounded)
+        curr += timedelta(days=1)
+        
+    # Rule 5: Calculate used_days by iterating day by day
+    used_days = 0
+    curr = d_start
+    while curr <= d_cancel and curr < d_end:
+        used_days += 1
+        curr += timedelta(days=1)
+        
+    # Rule 5: unused_days = total_days - used_days
+    unused_days = total_days - used_days
+    
+    # Rule 6: refund = price * unused_days / total_days
+    # Use Decimal for high precision arithmetic before rounding
+    refund = (d_price * Decimal(unused_days)) / Decimal(total_days)
+    
+    # Round to nearest cent, exact halves rounded up
+    refund_rounded = refund.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    
+    # Return as decimal string with exactly 2 decimal places
+    return format(refund_rounded, ".2f")

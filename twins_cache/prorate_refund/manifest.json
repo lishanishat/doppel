@@ -4,7 +4,7 @@
     "prompt_hash": "72dcb25a8748045c1955d25106bf9e4168b60b00d655a4cc70f40352dae8cfc9"
   },
   "twin_b": {
-    "model": "meta/muse-wonder-1.0",
+    "model": "gemini/gemini-3-flash-preview",
     "prompt_hash": "a7f280c0d46490accfae019f16a9031d15566696be0cc5ca5f553f079acd1a1b"
   }
 }

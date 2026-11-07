@@ -14,7 +14,7 @@ except ImportError:  # dotenv optional
 
 META_BASE_URL = "https://api.meta.ai/v1"
 DEFAULT_META_MODEL = "muse-spark-1.3"
-TIMEOUT_S = 120
+TIMEOUT_S = float(os.environ.get("LLM_TIMEOUT_S", "120"))
 RETRIES = 3
 
 
