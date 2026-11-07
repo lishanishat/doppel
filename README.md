@@ -45,7 +45,12 @@ addressed to it. Then send:
 - `verify mutant #N`: verify a seeded, automatically generated mutant of the reference (any held-out `N`).
 - `verify <github PR url> <function>`: any PR; out-of-scope functions return UNPROVEN with the reason.
 
-The demo target lives in a separate public repo: https://github.com/lishanishat/doppel-demo (issue #1 is the spec).
+A third agent, the **Coder agent** (Agentverse address `agent1q079huz7les8x0gvgxejagvdavlqzn0d0rqf5q97kerxx6433uxm6afu27c`),
+submits its own PR to the Orchestrator over the chat protocol and logs each step (`make coder`; default text
+`verify pr #3`, override with `CODER_SUBMIT_TEXT`). The Twin builder's address is
+`agent1q0kqwvkmemtmpxeu2l56yt9qgc9p07q4legc98t9rlqxrcd9hxgawqlnk8c`.
+
+PR #3 in `doppel-demo` is the AI-written code plus one automatically injected mutation. The demo target lives in a separate public repo: https://github.com/lishanishat/doppel-demo (issue #1 is the spec).
 
 ## Benchmark (measured, 15 held-out mutants)
 
@@ -83,6 +88,8 @@ baseline failed there and was excluded).
 
 ## Run it yourself
 
+Needs `uv` (if it is not on your PATH, use `python3 -m uv` in its place).
+
 ```bash
 git clone https://github.com/lishanishat/doppel.git && cd doppel
 uv venv -p 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt   # uagents needs Python 3.12
@@ -90,9 +97,22 @@ cp .env.example .env     # fill in MODEL_API_KEY (Meta), two random seed phrases
 .venv/bin/python -m pytest                      # unit tests
 .venv/bin/python -m bench.run_bench             # the benchmark (writes docs/BENCH.md and docs/bench.png)
 DOPPEL_STUBS=0 .venv/bin/python -m engine.cli --help   # run the engine from the command line
+make test            # same as the pytest line above
+make bench           # same as the benchmark line above (about 3 minutes)
+make demo            # scripted demo run (scripts/demo_run.sh)
 make twin-builder    # terminal 1: Twin builder agent (port 8004)
 make orchestrator    # terminal 2: Orchestrator agent (port 8003)
 ```
+
+Recovery demo: kill a twin mid-run and get a plain-English UNPROVEN instead of a crash
+(tested in `engine/tests/test_chaos.py`):
+
+```bash
+.venv/bin/python -m engine.cli verify --fn prorate_refund --pr demo_target/prorate_refund/ai_pr/billing.py --chaos twin_b
+```
+
+Plant your own bug: `python scripts/plant_bug.py FILE LINE OPERATOR` applies one automatic mutation (`--list` shows
+the sites; results go in `docs/live_bug_notes.md` once present).
 
 Then open each agent's Agent Inspector link from its log, **Connect → Mailbox**, and chat with the Orchestrator
 from its Agentverse profile. `DOPPEL_STUBS=1` (the default in `.env.example`) answers with labeled fixtures; set it to
