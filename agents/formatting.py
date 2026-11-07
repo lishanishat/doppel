@@ -19,6 +19,17 @@ def help_text() -> str:
     )
 
 
+def quick_ack_text(cmd) -> str:
+    """Instant acknowledgement, sent before any network work. Starts with "Got it." (Coder keys on it)."""
+    if getattr(cmd, "kind", "") == "verify_mutant":
+        what = f"mutant #{cmd.mutant_id}"
+    elif getattr(cmd, "pr_number", None):
+        what = f"PR #{cmd.pr_number}"
+    else:
+        what = "that PR"
+    return f"Got it. Verifying {what}: fetching it and the spec, then two independent twins and I compare all versions. Verdict in a moment."
+
+
 def ack_text(prep, max_examples: int) -> str:
     return (
         f"Got it. Verifying {prep.function_name} from {prep.pr_ref}. "
