@@ -5,115 +5,165 @@
   4,
   5,
   7,
-  10,
+  8,
   11,
+  13,
   14,
   16,
-  17
+  17,
+  19,
+  20,
+  22,
+  23
  ],
  "rows": {
   "1": {
-   "description": "line 35: '-' -> '+'",
-   "operator": "swap_arith",
+   "description": "line 39: ROUND_HALF_UP -> ROUND_UP",
+   "operator": "swap_rounding",
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 2.5577425956726074
+    "secs": 4.0380799770355225
    }
   },
   "2": {
-   "description": "line 32: '<=' -> '<'",
-   "operator": "flip_comparison",
-   "doppel": {
-    "verdict": "BLOCKED",
-    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 4.317136287689209
-   }
-  },
-  "4": {
-   "description": "line 36: '*' -> '/'",
-   "operator": "swap_arith",
-   "doppel": {
-    "verdict": "BLOCKED",
-    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 4.477308988571167
-   }
-  },
-  "5": {
-   "description": "line 27: removed check 'if p > Decimal('1000000'): raise ...'",
-   "operator": "remove_check",
-   "doppel": {
-    "verdict": "BLOCKED",
-    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 4.755774021148682
-   }
-  },
-  "7": {
    "description": "line 34: '-' -> '+'",
    "operator": "swap_arith",
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 2.345911741256714
+    "secs": 6.71925687789917
    }
   },
-  "10": {
-   "description": "line 36: '-' -> '+'",
-   "operator": "swap_arith",
+  "4": {
+   "description": "line 24: constant 0 -> -1",
+   "operator": "off_by_one_const",
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 2.751896619796753
+    "secs": 12.579356908798218
    }
   },
-  "11": {
-   "description": "line 36: ROUND_HALF_UP -> ROUND_DOWN",
-   "operator": "swap_rounding",
+  "5": {
+   "description": "line 29: constant 0 -> -1",
+   "operator": "off_by_one_const",
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 3.578989267349243
+    "secs": 12.81446886062622
    }
   },
-  "14": {
-   "description": "line 32: '<=' -> '<'",
+  "7": {
+   "description": "line 24: '<' -> '<='",
    "operator": "flip_comparison",
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 2.6264376640319824
+    "secs": 6.429145097732544
    }
   },
-  "16": {
-   "description": "line 21: removed check 'if not isinstance(price, str) or not _PRICE.fullmatch(price): raise ...'",
-   "operator": "remove_check",
+  "8": {
+   "description": "line 39: ROUND_HALF_UP -> ROUND_HALF_DOWN",
+   "operator": "swap_rounding",
    "doppel": {
     "verdict": "BLOCKED",
     "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
-    "secs": 4.258667230606079
+    "secs": 13.058769941329956
+   }
+  },
+  "11": {
+   "description": "line 39: ROUND_HALF_UP -> ROUND_DOWN",
+   "operator": "swap_rounding",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 7.795625925064087
+   }
+  },
+  "13": {
+   "description": "line 39: '/' -> '*'",
+   "operator": "swap_arith",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 3.0720560550689697
+   }
+  },
+  "14": {
+   "description": "line 37: '-' -> '+'",
+   "operator": "swap_arith",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 4.008617877960205
+   }
+  },
+  "16": {
+   "description": "line 29: constant 0 -> 1",
+   "operator": "off_by_one_const",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 4.375536203384399
    }
   },
   "17": {
-   "description": "line 36: ROUND_HALF_UP -> ROUND_HALF_DOWN",
-   "operator": "swap_rounding",
+   "description": "line 39: '*' -> '/'",
+   "operator": "swap_arith",
    "doppel": {
-    "verdict": "QUESTION",
-    "reason": "All three versions disagree on a confirmed input; the spec is likely ambiguous. Unanswered: not merged.",
-    "secs": 5.3910887241363525
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 2.5607781410217285
+   }
+  },
+  "19": {
+   "description": "line 34: constant 1 -> 0",
+   "operator": "off_by_one_const",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 2.786388874053955
+   }
+  },
+  "20": {
+   "description": "line 28: '-' -> '+'",
+   "operator": "swap_arith",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 2.6193902492523193
+   }
+  },
+  "22": {
+   "description": "line 24: constant 0 -> 1",
+   "operator": "off_by_one_const",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 2.6176438331604004
+   }
+  },
+  "23": {
+   "description": "line 34: '+' -> '-'",
+   "operator": "swap_arith",
+   "doppel": {
+    "verdict": "BLOCKED",
+    "reason": "PR outvoted 2-1 by twin_a and twin_b on a confirmed input.",
+    "secs": 3.656179189682007
    }
   }
  },
- "n_total": 18,
- "n_equiv": 3,
- "n_dev": 6,
- "twins": "engine/tests/placeholders/inclusive_twin.py + float_twin.py (PLACEHOLDER twins; twins_cache absent)",
+ "n_total": 23,
+ "n_equiv": 2,
+ "n_dev": 7,
+ "twins": "engine/tests/placeholders/lenient_twin.py + float_twin.py (PLACEHOLDER twins; twins_cache absent)",
  "pr_files": [],
  "llm_files": [],
  "max_examples": 1000,
  "time_budget_s": 20,
  "false_alarm": {
-  "verdict": "QUESTION",
-  "reason": "All three versions disagree on a confirmed input; the spec is likely ambiguous. Unanswered: not merged.",
-  "secs": 4.277626037597656
+  "verdict": "VERIFIED",
+  "reason": "VERIFIED on 919 inputs: all versions agree and all active rules hold.",
+  "secs": 9.924195051193237
  }
 }

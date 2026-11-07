@@ -15,17 +15,19 @@ def test_normal_and_reference():
     t = load("prorate_refund")
     assert t.entrypoint == "prorate_refund" and "def prorate_refund" in t.reference_code
     with Runner("ref", t.reference_code, t.entrypoint) as r:
-        assert r.call(OK_ARGS) == {"ok": True, "value": "20.00"}
+        assert r.call(OK_ARGS) == {"ok": True, "value": "19.00"}
         assert r.call({**OK_ARGS, "price": "1.005"}) == {"ok": False}
-    for name in ("float_twin", "inclusive_twin", "buggy_pr"):
+    for name in ("float_twin", "lenient_twin", "buggy_pr"):
         with Runner(name, (PH / f"{name}.py").read_text(), t.entrypoint) as r:
             assert r.call(OK_ARGS)["ok"] is True
-            assert r.call({**OK_ARGS, "cancel_date": "2027-01-01"}) == {"ok": False}
+            assert r.call({**OK_ARGS, "cancel_date": "2027-01-01"}) == {"ok": True, "value": "0.00"}
+            assert r.call({**OK_ARGS, "price": "-1.00"}) == {"ok": False}
             assert r.call({**OK_ARGS, "period_start": "2026/01/01"}) == {"ok": False}
     with Runner("bug", (PH / "buggy_pr.py").read_text(), t.entrypoint) as r:
-        assert r.call(OK_ARGS)["value"] != "20.00"
-    with Runner("inc", (PH / "inclusive_twin.py").read_text(), t.entrypoint) as r:
-        assert r.call(OK_ARGS)["value"] != "20.00"
+        assert r.call(OK_ARGS)["value"] != "19.00"
+    with Runner("len", (PH / "lenient_twin.py").read_text(), t.entrypoint) as r:
+        assert r.call(OK_ARGS) == {"ok": True, "value": "19.00"}
+        assert r.call({**OK_ARGS, "cancel_date": "2025-12-01"}) == {"ok": True, "value": "30.00"}
 
 
 def test_raised():

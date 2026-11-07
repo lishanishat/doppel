@@ -17,7 +17,7 @@ def _twin(arg, fn, which):
     cached = ROOT / "twins_cache" / fn / f"{which}.py"
     if cached.exists():
         return cached, "twins_cache"
-    return PLACEHOLDERS / ("inclusive_twin.py" if which == "twin_a" else "float_twin.py"), "placeholder"
+    return PLACEHOLDERS / ("lenient_twin.py" if which == "twin_a" else "float_twin.py"), "placeholder"
 
 
 def summary(ev: dict) -> str:

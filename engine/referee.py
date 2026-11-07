@@ -50,6 +50,11 @@ def _signature(outputs):
     return tuple(tuple(sorted(g)) for g in sorted(_groups(outputs)))
 
 
+def _pr_outvoted(sig):
+    """True if the partition is twins-together vs PR alone (a 2-1 the PR loses)."""
+    return len(sig) == 2 and ("pr",) in sig
+
+
 class _Disagree(Exception):
     pass
 
@@ -190,8 +195,8 @@ def run(target, versions, seed=0, max_examples=2000, time_budget_s=60):
         deadline = t0 + max(0.0, time_budget_s - reserve)
         with ThreadPoolExecutor(max_workers=len(runners)) as pool:
             ctx = _Ctx(runners, seed, max_examples, deadline, pool)
-            candidates = []
-            explore_s = shrink_s = 0.0
+            candidates, pre = [], {}
+            explore_s = shrink_s = early_confirm_s = 0.0
             for _ in range(K_MAX):
                 ts = time.perf_counter()
                 ctx.locked, ctx.best = None, None
@@ -204,12 +209,20 @@ def run(target, versions, seed=0, max_examples=2000, time_budget_s=60):
                 ctx.shrink_spent += min(dt, SHRINK_ROUND_S)
                 candidates.append((ctx.best, ctx.locked))
                 ctx.excluded.add(ctx.locked)
+                if _pr_outvoted(ctx.locked):
+                    # BLOCKED outranks every other verdict: confirm now and stop exploring if it holds
+                    tc = time.perf_counter()
+                    res = _confirm(runners, ctx.best[0], ctx.locked)
+                    early_confirm_s += time.perf_counter() - tc
+                    pre[len(candidates) - 1] = res
+                    if res is not None:
+                        break
                 if time.monotonic() >= deadline or ctx.shrink_spent >= SHRINK_TOTAL_S:
                     break
             tc = time.perf_counter()
             confirmed, flaky = [], 0
-            for (kwargs, _outs), sig in candidates:
-                res = _confirm(runners, kwargs, sig)
+            for i, ((kwargs, _outs), sig) in enumerate(candidates):
+                res = pre[i] if i in pre else _confirm(runners, kwargs, sig)
                 if res is None:
                     flaky += 1
                     continue
@@ -217,7 +230,7 @@ def run(target, versions, seed=0, max_examples=2000, time_budget_s=60):
                 confirmed.append({"input": kwargs,
                                   "outputs": {n: _clean(o) for n, o in outs.items()},
                                   "vote": v, "majority": maj})
-            confirm_s = time.perf_counter() - tc
+            confirm_s = time.perf_counter() - tc + early_confirm_s
     finally:
         for r in runners:
             try:

@@ -10,7 +10,7 @@ PH = Path(__file__).parent / "placeholders"
 
 def _versions(t, pr, a, b):
     code = {"ref": t.reference_code}
-    for n in ("float_twin", "inclusive_twin", "buggy_pr"):
+    for n in ("float_twin", "lenient_twin", "buggy_pr"):
         code[n] = (PH / f"{n}.py").read_text()
     return [{"name": n, "code": code[c], "entrypoint": t.entrypoint, "model": "test", "prompt_hash": None}
             for n, c in (("pr", pr), ("twin_a", a), ("twin_b", b))]
@@ -45,7 +45,7 @@ def test_buggy_pr():
 
 def test_twin_disagreements():
     t = load("prorate_refund")
-    r = referee.run(t, _versions(t, "ref", "float_twin", "inclusive_twin"), max_examples=1500, time_budget_s=40)
+    r = referee.run(t, _versions(t, "ref", "float_twin", "lenient_twin"), max_examples=1500, time_budget_s=40)
     print("twins", r["timings"], r["n_inputs"], r["disagreements"], r["flaky"])
     for c in r["confirmed"]:
         print(" ", c["vote"], c["majority"], c["input"], c["outputs"])

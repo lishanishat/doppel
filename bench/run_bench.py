@@ -26,8 +26,8 @@ def _twins() -> tuple[str, str, str]:
     if a.exists() and b.exists():
         return a.read_text(), b.read_text(), f"twins_cache/{FN}/ (real twins)"
     ph = ROOT / "engine" / "tests" / "placeholders"
-    return ((ph / "inclusive_twin.py").read_text(), (ph / "float_twin.py").read_text(),
-            "engine/tests/placeholders/inclusive_twin.py + float_twin.py (PLACEHOLDER twins; twins_cache absent)")
+    return ((ph / "lenient_twin.py").read_text(), (ph / "float_twin.py").read_text(),
+            "engine/tests/placeholders/lenient_twin.py + float_twin.py (PLACEHOLDER twins; twins_cache absent)")
 
 
 def _verify(pr_code: str, tag: str, args) -> dict:

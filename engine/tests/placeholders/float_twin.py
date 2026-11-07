@@ -1,30 +1,34 @@
 """Placeholder twin: float math, so cent rounding differs from Decimal HALF_UP."""
-import re
 from datetime import date
-
-_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
-_PRICE = re.compile(r"\d+(\.\d{1,2})?")
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 
 def _d(s):
-    if not isinstance(s, str) or not _DATE.fullmatch(s):
-        raise ValueError("bad date")
-    return date.fromisoformat(s)
+    try:
+        return date.fromisoformat(s)
+    except (TypeError, ValueError) as e:
+        raise ValueError("bad date") from e
 
 
 def _check(price, period_start, period_end, cancel_date):
-    if not isinstance(price, str) or not _PRICE.fullmatch(price) or float(price) > 1000000:
+    try:
+        p = Decimal(price)
+    except (InvalidOperation, TypeError) as e:
+        raise ValueError("bad price") from e
+    if not p.is_finite() or p < 0 or p != p.quantize(Decimal("0.01")):
         raise ValueError("bad price")
     s, e, c = _d(period_start), _d(period_end), _d(cancel_date)
-    if not s < e:
+    if (e - s).days <= 0:
         raise ValueError("bad period")
-    if not s <= c <= e:
-        raise ValueError("cancel outside period")
-    return float(price), s, e, c
+    return p, s, e, c
 
 
 def prorate_refund(price, period_start, period_end, cancel_date):
     p, s, e, c = _check(price, period_start, period_end, cancel_date)
+    if c >= e:
+        return "0.00"
+    if c < s:
+        raise ValueError("cancel before start")
     total = (e - s).days
-    used = (c - s).days
-    return f"{round(p * (total - used) / total, 2):.2f}"
+    unused = total - ((c - s).days + 1)
+    return f"{round(float(p) * unused / total, 2):.2f}"

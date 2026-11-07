@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Callable, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
-_PRICE_RE = re.compile(r"^\d+(\.\d{1,2})?$")
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _TWO_DP = re.compile(r"^\d+\.\d{2}$")
+_PLAIN_PRICE = re.compile(r"^\d+(\.\d{1,2})?$")
 
 
 @dataclass
@@ -31,21 +31,39 @@ def _d(s):
         return None
 
 
-def is_valid_input(kw: dict) -> bool:
-    """Spec rules 1-4."""
+def classify_input(kw: dict) -> str:
+    """Spec rule 2 -> "valid" | "invalid" | "unclear". Only clear-cut cases count, so a rule never
+    blocks on a reading the spec leaves open (e.g. "1E+2" prices, cancel_date before period_start)."""
     p = kw.get("price")
-    if not isinstance(p, str) or not _PRICE_RE.match(p):
-        return False
-    if not (Decimal(p) <= Decimal("1000000")):
-        return False
-    s, e, c = (_d(kw.get(k)) for k in ("period_start", "period_end", "cancel_date"))
-    if None in (s, e, c) or not s < e:
-        return False
-    return s <= c <= e
+    if not isinstance(p, str):
+        return "invalid"
+    try:
+        dp = Decimal(p)
+    except InvalidOperation:
+        return "invalid"
+    if not dp.is_finite() or dp < 0 or dp != dp.quantize(Decimal("0.01")):
+        return "invalid"
+    dates = [kw.get(k) for k in ("period_start", "period_end", "cancel_date")]
+    parsed = [_d(x) for x in dates]
+    for raw, d in zip(dates, parsed):
+        if d is None:
+            if isinstance(raw, str) and _DATE_RE.match(raw):
+                return "invalid"  # right shape, not a real calendar date
+            return "invalid" if not isinstance(raw, str) else "unclear"
+    s, e, c = parsed
+    if not s < e:
+        return "invalid"
+    if not _PLAIN_PRICE.match(p) or c < s:
+        return "unclear"
+    return "valid"
+
+
+def is_valid_input(kw: dict) -> bool:
+    return classify_input(kw) == "valid"
 
 
 def _never_out_of_range(kw, res) -> bool:
-    if not res.get("ok"):
+    if not res.get("ok") or classify_input(kw) != "valid":
         return True
     try:
         v, price = Decimal(str(res["value"])), Decimal(str(kw["price"]))
@@ -62,17 +80,25 @@ def _two_dp(kw, res) -> bool:
 
 
 def _invalid_raises(kw, res) -> bool:
-    return is_valid_input(kw) or not res.get("ok")
+    return classify_input(kw) != "invalid" or not res.get("ok")
+
+
+def _zero_after_end(kw, res) -> bool:
+    if classify_input(kw) != "valid" or _d(kw["cancel_date"]) < _d(kw["period_end"]):
+        return True
+    return res.get("ok") is True and res.get("value") == "0.00"
 
 
 RULES: dict[str, list[Rule]] = {
     "prorate_refund": [
-        Rule("never_negative_or_above_price", "A refund is never negative and never more than `price`.",
+        Rule("never_negative_or_above_price", "A refund is never negative and never more than the price.",
              _never_out_of_range),
-        Rule("exactly_2dp_string", "Return the refund as a string with exactly two decimal places",
+        Rule("exactly_2dp_string", "The refund as a decimal string with exactly 2 decimal places",
              _two_dp),
-        Rule("invalid_input_raises", "Invalid input must raise an exception. Never return a value for invalid input.",
-             _invalid_raises),
+        Rule("invalid_input_raises", "Invalid input raises `ValueError`", _invalid_raises),
+        Rule("zero_on_or_after_end",
+             "If `cancel_date` is on or after `period_end`, nothing is left unused and the refund is `\"0.00\"`.",
+             _zero_after_end),
     ]
 }
 

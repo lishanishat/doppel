@@ -152,13 +152,13 @@ def fuzz_inputs(fn_name: str = "prorate_refund", n: int = 3000, seed: int = 0) -
     import importlib
 
     from hypothesis import HealthCheck, Phase, given, seed as hseed, settings
-    schema = importlib.import_module(f"demo_target.{fn_name}.schema")
+    from engine.target import strategy_for
     got: list[dict] = []
 
     @hseed(seed)
     @settings(max_examples=n, database=None, phases=[Phase.generate], deadline=None,
               suppress_health_check=list(HealthCheck))
-    @given(schema.inputs())
+    @given(strategy_for(fn_name))
     def collect(kw):
         got.append(kw)
 

@@ -70,12 +70,23 @@ def test_rules():
         {"input": INP, "outputs": {"pr": ok("15"), "twin_a": ok("15.00"), "twin_b": ok("15.00")}},
     ]
     res = {r["name"]: r for r in rules.evaluate("prorate_refund", samples)}
-    assert len(res) == 3 and all(r["status"] == "active" and not r["passed"] for r in res.values())
+    assert len(res) == 4 and all(res[n]["status"] == "active" and not res[n]["passed"]
+                                 for n in ("never_negative_or_above_price", "exactly_2dp_string", "invalid_input_raises"))
+    after = {**INP, "cancel_date": "2026-05-03"}
+    s3 = [{"input": after, "outputs": {"pr": ok("1.00"), "twin_a": ok("0.00"), "twin_b": ok("0.00")}}]
+    r3 = {x["name"]: x for x in rules.evaluate("prorate_refund", s3)}
+    assert r3["zero_on_or_after_end"]["status"] == "active" and not r3["zero_on_or_after_end"]["passed"]
+    # cancel before start is unspecified -> no rule blocks either answer
+    before = {**INP, "cancel_date": "2026-03-01"}
+    s4 = [{"input": before, "outputs": {"pr": ok("30.00"), "twin_a": RAISE, "twin_b": ok("30.00")}}]
+    assert all(x["passed"] for x in rules.evaluate("prorate_refund", s4))
     # all versions break rule -> advisory
     s2 = [{"input": INP, "outputs": {n: ok("99.00") for n in ("pr", "twin_a", "twin_b")}}]
     r = {x["name"]: x for x in rules.evaluate("prorate_refund", s2)}
     assert r["never_negative_or_above_price"]["status"] == "advisory"
-    assert rules.is_valid_input(INP) and not rules.is_valid_input({**INP, "cancel_date": "2026-05-02"})
+    assert rules.is_valid_input(INP) and rules.is_valid_input({**INP, "cancel_date": "2026-05-02"})
+    assert rules.classify_input({**INP, "cancel_date": "2026-03-01"}) == "unclear"
+    assert rules.classify_input({**INP, "price": "-1.00"}) == "invalid"
     assert not rules.is_valid_input({**INP, "period_end": "2026-04-01"})
 
 

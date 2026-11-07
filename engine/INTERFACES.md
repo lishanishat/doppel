@@ -73,5 +73,5 @@ module can be built in parallel. Python 3, stdlib + hypothesis (+ matplotlib in 
   chart PNG `docs/bench.png` + `docs/BENCH.md`. **Only real measured numbers.**
 
 ## Placeholder versions (until real twins land): `engine/tests/placeholders/`
-- `float_twin.py` (uses float math -> rounding disagreements), `inclusive_twin.py` (counts cancel day
-  as used -> the ambiguity), `buggy_pr.py` (off-by-one on total days).
+- `float_twin.py` (uses float math -> rounding disagreements), `lenient_twin.py` (full refund when cancel_date < period_start, which the spec leaves open
+  -> the ambiguity), `buggy_pr.py` (off-by-one on total days).

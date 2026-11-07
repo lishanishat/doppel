@@ -28,7 +28,7 @@ def test_api_heldout_excludes_equivalent():
 def test_baseline_runner(tmp_path):
     t = tmp_path / "test_x.py"
     t.write_text("from solution import prorate_refund\n"
-                 "def test_a():\n assert prorate_refund('30.00','2026-01-01','2026-01-31','2026-01-16')=='15.00'\n")
+                 "def test_a():\n assert prorate_refund('30.00','2026-01-01','2026-01-31','2026-01-16')=='14.00'\n")
     assert baselines.run_tests(REF, [t])["status"] == "passed"
-    bad = REF.replace("ROUND_HALF_UP", "ROUND_UP", 1).replace("(total - used)", "(total - used + 1)")
+    bad = REF.replace("ROUND_HALF_UP", "ROUND_UP", 1).replace("(cancel - start).days + 1", "(cancel - start).days")
     assert baselines.run_tests(bad, [t])["caught"]
