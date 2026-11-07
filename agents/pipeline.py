@@ -113,9 +113,10 @@ def run(prep: Prepared, twins: list[Version], max_examples: int) -> tuple[Eviden
             "pr_ref": prep.pr_ref,
         }
         evidence = engine_api.verify(req)
+        models = {v.get("name"): v.get("model") for v in twins}
         url = None
         if prep.repo and prep.pr_number:
-            body = formatting.verdict_text(evidence, None)
+            body = formatting.verdict_text(evidence, None, models)
             event = "REQUEST_CHANGES" if evidence["verdict"] == "BLOCKED" else "COMMENT"
             try:
                 url = github_client.post_review(prep.repo, prep.pr_number, body, event)
@@ -125,7 +126,7 @@ def run(prep: Prepared, twins: list[Version], max_examples: int) -> tuple[Eviden
                         url = github_client.post_review(prep.repo, prep.pr_number, body, "COMMENT")
                     except Exception:
                         url = None
-        return evidence, formatting.verdict_text(evidence, url)
+        return evidence, formatting.verdict_text(evidence, url, models)
     except Exception as e:  # never raise
         ev = _unproven(f"verification failed: {str(e)[:200] or type(e).__name__}")
         return ev, formatting.verdict_text(ev, None)
@@ -135,7 +136,7 @@ def answer(question_id: str, choice: str) -> str:
     try:
         from engine import api as engine_api
         n = engine_api.answer_question(question_id, choice)
-        label = {"pr": "the PR", "twin_a": "Twin A", "twin_b": "Twin B"}.get(choice, choice)
+        label = {"pr": "the submitted code", "twin_a": "Rebuild 1", "twin_b": "Rebuild 2"}.get(choice, choice)
         return f"Recorded: {label} is correct. Saved as a regression test ({n} saved in total)."
     except Exception as e:
         return formatting.error_text(f"Couldn't save that answer: {str(e)[:200]}")

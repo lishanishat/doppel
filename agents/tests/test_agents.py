@@ -62,12 +62,12 @@ def test_formatting_fixtures(name):
 
 def test_blocked_content():
     t = formatting.verdict_text(fx("blocked"), "http://rev")
-    assert "✗ PR: 0.00" in t and "✓ Twin A: 1.03" in t and "Vote: 2-1" in t and "http://rev" in t
+    assert "✗ Submitted code (the PR): 0.00" in t and "✓ Rebuild 1: 1.03" in t and "vote 2-1" in t and "http://rev" in t
 
 
 def test_question_content():
     t = formatting.verdict_text(fx("question"))
-    for s in ["1. PR", "2. Twin A", "3. Twin B", "answer 1", "answer 3", "does that day count"]:
+    for s in ["1. Submitted code (the PR)", "2. Rebuild 1", "3. Rebuild 2", "answer 1", "answer 3", "does that day count"]:
         assert s in t
 
 
@@ -125,7 +125,7 @@ def test_run_exception_becomes_unproven(monkeypatch):
 
 
 def test_answer_stub():
-    assert "Twin A" in pipeline.answer("q-1", "twin_a")
+    assert "Rebuild 1" in pipeline.answer("q-1", "twin_a")
 
 
 def test_prepare_pr(monkeypatch):
@@ -198,3 +198,12 @@ def test_ack_sent_before_prepare(monkeypatch):
     assert kinds.index("prepare") > 1  # ChatAck, then quick ack, both before prepare
     texts = [t for k, t in events if k == "send" and t]
     assert texts[0].startswith("Got it.") and sum(t.startswith("Got it.") for t in texts) == 1
+
+
+def test_rebuild_labels_show_vendor_and_model():
+    import json
+    from agents.formatting import verdict_text
+    ev = json.load(open("contract/fixtures/blocked.json"))
+    t = verdict_text(ev, None, {"twin_a": "meta/muse-spark-1.3", "twin_b": "gemini/gemini-3-flash-preview"})
+    assert "Rebuild 1 (Meta muse-spark-1.3)" in t and "Rebuild 2 (Google gemini-3-flash-preview)" in t
+    assert "twin_a" not in t and "outvoted" in t
