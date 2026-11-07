@@ -1,6 +1,7 @@
 """Orchestrator agent: ASI:One chat -> parse -> prepare -> twins -> verify -> verdict."""
 import asyncio
 import json
+import os
 import time
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -46,6 +47,9 @@ async def _finish(ctx: Context, session_id: str, twins: list):
         return  # already handled (response vs timeout race)
     sender, prep = entry["sender"], entry["prep"]
     try:
+        delay = float(os.environ.get("DEBUG_DELAY_S", "0"))  # test-only: simulate a slow verification
+        if delay:
+            await asyncio.sleep(delay)
         evidence, text = await asyncio.to_thread(pipeline.run, prep, twins, config.max_examples())
         q = evidence.get("question") if isinstance(evidence, dict) else None
         if evidence.get("verdict") == "QUESTION" and q:
