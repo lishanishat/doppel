@@ -1,0 +1,182 @@
+[
+ {
+  "id": 1,
+  "split": "heldout",
+  "operator": "swap_arith",
+  "description": "line 35: '-' -> '+'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel + start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 2,
+  "split": "heldout",
+  "operator": "flip_comparison",
+  "description": "line 32: '<=' -> '<'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel < end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 3,
+  "split": "dev",
+  "operator": "remove_check",
+  "description": "line 15: removed check 'if not isinstance(s, str) or not _DATE.fullmatch(s): raise ...'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": true,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 4,
+  "split": "heldout",
+  "operator": "swap_arith",
+  "description": "line 36: '*' -> '/'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p / (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 5,
+  "split": "heldout",
+  "operator": "remove_check",
+  "description": "line 27: removed check 'if p > Decimal('1000000'): raise ...'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 6,
+  "split": "dev",
+  "operator": "swap_rounding",
+  "description": "line 36: ROUND_HALF_UP -> ROUND_UP",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation, ROUND_UP\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 7,
+  "split": "heldout",
+  "operator": "swap_arith",
+  "description": "line 34: '-' -> '+'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end + start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 8,
+  "split": "heldout",
+  "operator": "remove_check",
+  "description": "line 30: removed check 'if not start < end: raise ...'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": true,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 9,
+  "split": "dev",
+  "operator": "flip_comparison",
+  "description": "line 27: '>' -> '>='",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p >= Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 10,
+  "split": "heldout",
+  "operator": "swap_arith",
+  "description": "line 36: '-' -> '+'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total + used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 11,
+  "split": "heldout",
+  "operator": "swap_rounding",
+  "description": "line 36: ROUND_HALF_UP -> ROUND_DOWN",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation, ROUND_DOWN\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_DOWN)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 12,
+  "split": "dev",
+  "operator": "off_by_one_const",
+  "description": "line 27: Decimal('1000000') -> Decimal('1000001')",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000001'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 13,
+  "split": "heldout",
+  "operator": "flip_comparison",
+  "description": "line 30: '<' -> '<='",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start <= end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": true,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 14,
+  "split": "heldout",
+  "operator": "flip_comparison",
+  "description": "line 32: '<=' -> '<'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start < cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 15,
+  "split": "dev",
+  "operator": "remove_check",
+  "description": "line 32: removed check 'if not start <= cancel <= end: raise ...'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 16,
+  "split": "heldout",
+  "operator": "remove_check",
+  "description": "line 21: removed check 'if not isinstance(price, str) or not _PRICE.fullmatch(price): raise ...'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 17,
+  "split": "heldout",
+  "operator": "swap_rounding",
+  "description": "line 36: ROUND_HALF_UP -> ROUND_HALF_DOWN",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation, ROUND_HALF_DOWN\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) / total).quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ },
+ {
+  "id": 18,
+  "split": "dev",
+  "operator": "swap_arith",
+  "description": "line 36: '/' -> '*'",
+  "code": "\"\"\"Correct reference for prorate_refund (written by hand by the engine side; NOT shown to twins).\n\nInterpretation of the deliberately ambiguous rule 7: the cancellation day itself is NOT used\n(used_days = cancel_date - period_start). Cancelling on period_start refunds the full price.\n\"\"\"\nimport re\nfrom datetime import date\nfrom decimal import ROUND_HALF_UP, Decimal, InvalidOperation\n_DATE = re.compile('\\\\d{4}-\\\\d{2}-\\\\d{2}')\n_PRICE = re.compile('\\\\d+(\\\\.\\\\d{1,2})?')\n\ndef _parse_date(s):\n    if not isinstance(s, str) or not _DATE.fullmatch(s):\n        raise ValueError(f'bad date: {s!r}')\n    return date.fromisoformat(s)\n\ndef prorate_refund(price, period_start, period_end, cancel_date):\n    if not isinstance(price, str) or not _PRICE.fullmatch(price):\n        raise ValueError(f'bad price: {price!r}')\n    try:\n        p = Decimal(price)\n    except InvalidOperation:\n        raise ValueError(f'bad price: {price!r}')\n    if p > Decimal('1000000'):\n        raise ValueError('price out of range')\n    start, end, cancel = (_parse_date(period_start), _parse_date(period_end), _parse_date(cancel_date))\n    if not start < end:\n        raise ValueError('period_start must be before period_end')\n    if not start <= cancel <= end:\n        raise ValueError('cancel_date outside period')\n    total = (end - start).days\n    used = (cancel - start).days\n    refund = (p * (total - used) * total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n    return f'{refund:.2f}'\n",
+  "entrypoint": "prorate_refund",
+  "likely_equivalent": false,
+  "fuzz_inputs": 3000
+ }
+]
