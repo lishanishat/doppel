@@ -156,3 +156,13 @@ def test_prepare_mutant(monkeypatch, tmp_path):
     (tmp_path / "demo_target" / "prorate_refund" / "spec.md").write_text("def prorate_refund(x)\n")
     p = pipeline.prepare(Command("verify_mutant", mutant_id=17))
     assert p.pr_ref == "mutant#17" and p.pr_number is None
+
+
+def test_parse_strips_leading_mention():
+    from agents.commands import parse
+    addr = "@agent1qw3l50t8rpzg9dfhpfnyrkpcceuxrmpxd6qtue2rfr86ddh5yg6jkvuue9m"
+    assert parse(f"{addr} verify pr #2").kind == "verify_pr"
+    assert parse(f"{addr} verify pr #2").pr_number == 2
+    assert parse(f"@doppel-orchestrator verify mutant #17").mutant_id == 17
+    assert parse(f"{addr} answer 2").kind == "answer"
+    assert parse(f"{addr}").kind == "help"

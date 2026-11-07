@@ -38,6 +38,8 @@ def _norm_answer(s: str) -> Optional[str]:
 
 def parse(text: str) -> Command:
     t = re.sub(r"\s+", " ", (text or "").strip())
+    # ASI:One prefixes messages with the agent's @mention/address; drop leading mentions.
+    t = re.sub(r"^(?:@\S+\s*)+", "", t).strip()
     low = t.lower()
 
     m = _URL_RE.search(t)
