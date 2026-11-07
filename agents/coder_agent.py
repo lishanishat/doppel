@@ -14,6 +14,7 @@ from uagents_core.contrib.protocols.chat import (
 )
 
 from agents import config
+from agents.coder_logic import classify
 
 agent = Agent(
     name="doppel-coder",
@@ -25,11 +26,6 @@ agent = Agent(
 chat_proto = Protocol(spec=chat_protocol_spec)
 
 STATE: dict = {"t0": None, "done": False}
-
-
-def classify(text: str) -> str:
-    """'running' for the orchestrator's acknowledgement ("Got it..."), else 'verdict'."""
-    return "running" if (text or "").strip().startswith("Got it") else "verdict"
 
 
 def _text(msg: ChatMessage) -> str:

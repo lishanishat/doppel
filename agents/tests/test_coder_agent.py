@@ -1,4 +1,4 @@
-from agents.coder_agent import classify
+from agents.coder_logic import classify
 
 
 def test_ack_is_running():
