@@ -70,7 +70,9 @@ def decide(referee_result, rule_results, build_errors, scope_error,
         return ("UNPROVEN", "No referee result.", None, None)
     faults = {k: v for k, v in rr.get("faults", {}).items() if v}
     if faults:
-        return ("UNPROVEN", "Version fault(s) (timeout/crash): " + ", ".join(f"{k} x{v}" for k, v in faults.items()), None, None)
+        names = ", ".join(sorted(faults))
+        return ("UNPROVEN", f"Not enough evidence: {names} crashed or timed out during the run "
+                f"({sum(faults.values())} faults), so Doppel will not issue a verdict on partial evidence.", None, None)
     n = rr.get("n_inputs", 0)
     if n <= 0:
         return ("UNPROVEN", "No inputs were run.", None, None)
