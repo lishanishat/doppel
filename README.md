@@ -16,7 +16,7 @@ You talk to Doppel in an **ASI:One** chat. Give it a pull request and it:
 
 1. Reads the PR and the linked issue (the spec) from GitHub.
 2. Asks a separate **Twin builder** agent for two independent rebuilds of the function, written from the spec text
-   only: Twin A (`meta/muse-spark-1.3`, normal approach) and Twin B (`meta/muse-wonder-1.0`, deliberately naive,
+   only: Twin A (`meta/muse-spark-1.3`, normal approach) and Twin B (`gemini/gemini-3-flash-preview`, a different vendor, deliberately naive,
    literal, brute-force). The twins never see the PR's code.
 3. Runs the PR and both twins as separate processes on the same generated inputs (Hypothesis), shrinks every
    disagreement to the smallest input that reproduces it, and re-runs it twice on fresh processes to rule out
@@ -73,11 +73,15 @@ no one has to write tests or an oracle, the verdict is deterministic and reprodu
 an ambiguous spec. A baseline test only counts if it also passes on the correct reference (one test in each
 baseline failed there and was excluded).
 
+## Real AI code study
+
+Five more implementations of the spec, each written by a fresh coding agent (Claude Sonnet, Haiku and Opus) from the issue text only: all 5 are correct on 3000 generated inputs, and Doppel returned VERIFIED for all 5, so no false alarms on real AI-written code. Checking inputs the spec doesn't define, all 8 AI-written versions reject the price `"1.500"` while our own reference accepts it, and the Meta and Gemini twins disagree with each other on formats such as `".5"`. Details and the honest caveats: `docs/WILD.md`.
+
 ## Limitations
 
-- **Independence is partial.** Both twins come from Meta models (two different model lines). We tried other
-  vendors (SubQ Snap is a decision model that can't write code; OpenAI and Gemini keys did not work in time), so
-  shared mistakes between the twins are possible. Differing algorithms and spec-cited rules reduce this, and the
+- **Independence is partial.** The twins come from two vendors (Meta and Google Gemini) and use different
+  algorithms, but shared mistakes are still possible (SubQ Snap is a decision model that can't write code, so it is not
+  used). Differing algorithms and spec-cited rules reduce this, and the
   benchmark counts what slips through.
 - **Scope today:** pure functions with a written spec (money, dates, parsing, limits). No databases, UIs, network
   calls, concurrency or performance.

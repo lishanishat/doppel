@@ -2,7 +2,7 @@
 
 ## FINAL STATE (v3, Nov 7 ~3 pm): supersedes the plan below where they differ
 
-- Both twins are Meta: Twin A `meta/muse-spark-1.3`, Twin B `meta/muse-wonder-1.0` (deliberately naive). SubQ Snap is a decision model that cannot write code, and the OpenAI/Gemini keys did not work in time. No Subquadratic usage, one model vendor.
+- Twins come from two vendors: Twin A `meta/muse-spark-1.3`, Twin B `gemini/gemini-3-flash-preview` (deliberately naive; adopted ~3:45 pm after it matched the reference on 3000 inputs and the benchmark was unchanged). SubQ Snap is a decision model that cannot write code. Real-AI-code study: docs/WILD.md. No Subquadratic usage.
 - Spec gap closed: cancel before period start = full refund.
 - QUESTION demo dropped (no natural trigger in the demo function); the path is built and unit-tested.
 - A Coder agent exists: it submits its PR to the Orchestrator and logs each step.

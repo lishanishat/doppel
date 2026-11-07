@@ -10,15 +10,16 @@ Verify AI-written code by rebuilding it independently from the spec and making t
 Doppel rebuilds an AI-written function twice from the spec alone, runs the PR and both rebuilds on the same generated inputs, and lets fixed code (never an LLM) return VERIFIED, BLOCKED, QUESTION or UNPROVEN. You use it from an ASI:One chat, and it posts a GitHub review with the counterexample.
 
 ## Long description (~150 words)
-You give Doppel a pull request in ASI:One chat. It reads the PR and the linked issue (the spec) from GitHub, then asks a separate Twin builder agent for two independent rebuilds from the spec text only: Twin A (muse-spark-1.3) and Twin B (muse-wonder-1.0, deliberately naive). The PR and both twins run as separate processes on the same Hypothesis-generated inputs; disagreements are shrunk and re-run twice to rule out flakiness. Fixed code decides the verdict and a GitHub review is posted.
+You give Doppel a pull request in ASI:One chat. It reads the PR and the linked issue (the spec) from GitHub, then asks a separate Twin builder agent for two independent rebuilds from the spec text only: Twin A (Meta muse-spark-1.3) and Twin B (Google gemini-3-flash-preview, deliberately naive). The PR and both twins run as separate processes on the same Hypothesis-generated inputs; disagreements are shrunk and re-run twice to rule out flakiness. Fixed code decides the verdict and a GitHub review is posted.
 
-Measured: on 15 held-out, automatically generated mutants, Doppel caught 15/15, the PR's own tests 13/15, and LLM-written blind tests 15/15. We match blind tests, we do not beat them. No false alarm on the correct reference.
+Measured: on 15 held-out, automatically generated mutants, Doppel caught 15/15, the PR's own tests 13/15, and LLM-written blind tests 15/15. We match blind tests, we do not beat them. No false alarm on the correct reference. On 5 independent AI implementations from 3 Claude models, Doppel returned VERIFIED for all 5 (all correct; no false alarms).
 
-Honest limits: both twins are Meta models, so shared mistakes are possible; one function with a written spec; "VERIFIED on N inputs" is evidence, not proof; the QUESTION path is built and tested but has no natural demo trigger; the Orchestrator runs on a laptop behind an Agentverse mailbox.
+Honest limits: the twins come from two vendors but shared mistakes are still possible; one function with a written spec; "VERIFIED on N inputs" is evidence, not proof; the QUESTION path is built and tested but has no natural demo trigger; the Orchestrator runs on a laptop behind an Agentverse mailbox.
 
 ## Built with
 - Fetch.ai uAgents, Agentverse (mailbox), ASI:One chat protocol
-- Meta Model API: muse-spark-1.3 and muse-wonder-1.0
+- Meta Model API: muse-spark-1.3 (Twin A, blind-test baseline)
+- Google Gemini API: gemini-3-flash-preview (Twin B)
 - Hypothesis (property-based testing)
 - GitHub API
 - Python
