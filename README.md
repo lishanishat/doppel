@@ -112,7 +112,8 @@ Recovery demo: kill a twin mid-run and get a plain-English UNPROVEN instead of a
 ```
 
 Plant your own bug: `python scripts/plant_bug.py FILE LINE OPERATOR` applies one automatic mutation (`--list` shows
-the sites; results go in `docs/live_bug_notes.md` once present).
+the sites). Six recorded plants are in `docs/live_bug_notes.md`: 5 blocked, 1 not blocked (a removed check that a later
+regex check makes redundant), each in about 0.6 s.
 
 Then open each agent's Agent Inspector link from its log, **Connect → Mailbox**, and chat with the Orchestrator
 from its Agentverse profile. `DOPPEL_STUBS=1` (the default in `.env.example`) answers with labeled fixtures; set it to
