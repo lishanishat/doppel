@@ -41,12 +41,12 @@ def test_subq_failure_falls_back_to_meta(tmp_path, monkeypatch):
 
     def complete(provider, system, user, temperature=0.0):
         calls.append((provider, temperature))
-        if provider in ("subq", "openai", "gemini"):
+        if provider in ("gemini", "openai", "meta2"):
             raise RuntimeError("down")
         return "```python\ndef f(x): return 'm'\n```", "meta/real"
     monkeypatch.setattr(llm, "complete", complete)
     a, b = generate.generate_twins(SPEC, "f", SIG, tmp_path)
-    assert calls == [("meta", 0.0), ("subq", 0.0), ("openai", 0.0), ("gemini", 0.0), ("meta", 0.7)]
+    assert calls == [("meta", 0.0), ("gemini", 0.0), ("openai", 0.0), ("meta2", 0.0), ("meta", 0.7)]
     assert b["model"] == "meta/real"
     assert "meta/real" in (tmp_path / "f" / "manifest.json").read_text()
 
@@ -59,7 +59,7 @@ def test_prompts_contain_only_spec_and_signature():
 
 def test_openai_used_for_twin_b_when_subq_down(tmp_path, monkeypatch):
     def complete(provider, system, user, temperature=0.0):
-        if provider in ("subq", "gemini"):
+        if provider in ("gemini", "meta2"):
             raise RuntimeError("down")
         return "```python\ndef f(x): return 'x'\n```", f"{provider}/m"
     monkeypatch.setattr(llm, "complete", complete)

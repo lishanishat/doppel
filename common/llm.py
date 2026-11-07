@@ -27,6 +27,12 @@ def _client(provider: str):
             raise RuntimeError("MODEL_API_KEY is not set")
         model = os.environ.get("META_MODEL", DEFAULT_META_MODEL)
         return OpenAI(base_url=META_BASE_URL, api_key=key, timeout=TIMEOUT_S, max_retries=0), model
+    if provider == "meta2":  # a different Meta model line, for Twin B when no other vendor is available
+        key = os.environ.get("MODEL_API_KEY")
+        if not key:
+            raise RuntimeError("MODEL_API_KEY is not set")
+        model = os.environ.get("META_ALT_MODEL", "muse-wonder-1.0")
+        return OpenAI(base_url=META_BASE_URL, api_key=key, timeout=TIMEOUT_S, max_retries=0), model
     if provider == "subq":
         key, url, model = (os.environ.get(k) for k in ("SUBQ_API_KEY", "SUBQ_BASE_URL", "SUBQ_MODEL"))
         if not (key and url and model):
@@ -62,7 +68,7 @@ def complete(provider: str, system: str, user: str, temperature: float = 0.0) ->
             text = resp.choices[0].message.content or ""
             if not text.strip():
                 raise RuntimeError("empty completion")
-            return text, f"{provider}/{model}"
+            return text, f"{provider.replace('meta2', 'meta')}/{model}"
         except Exception as e:  # noqa: BLE001
             last = e
             if attempt < RETRIES - 1:
