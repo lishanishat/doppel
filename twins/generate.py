@@ -45,9 +45,14 @@ def _gen_one(name: str, fn: str, system: str, user: str, root: Path) -> Version:
     if name == "twin_a":
         text, model = llm.complete("meta", system, user)
     else:
-        try:
-            text, model = llm.complete("subq", system, user)
-        except Exception:  # noqa: BLE001  SubQ unverified/unavailable: honest Meta fallback
+        text = model = None
+        for provider in ("subq", "openai"):  # a different model family from Twin A, if configured
+            try:
+                text, model = llm.complete(provider, system, user)
+                break
+            except Exception:  # noqa: BLE001  unconfigured/unavailable: try the next one
+                continue
+        if text is None:  # honest fallback: same family as Twin A (recorded in the header and manifest)
             text, model = llm.complete("meta", system, user, temperature=0.7)
     code = header(model, phash) + extract_code(text)
     path.parent.mkdir(parents=True, exist_ok=True)

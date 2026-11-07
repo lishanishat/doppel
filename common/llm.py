@@ -32,6 +32,12 @@ def _client(provider: str):
         if not (key and url and model):
             raise RuntimeError("SUBQ_API_KEY / SUBQ_BASE_URL / SUBQ_MODEL not all set")
         return OpenAI(base_url=url, api_key=key, timeout=TIMEOUT_S, max_retries=0), model
+    if provider == "openai":
+        key = os.environ.get("OPENAI_API_KEY")
+        if not key:
+            raise RuntimeError("OPENAI_API_KEY is not set")
+        model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+        return OpenAI(api_key=key, timeout=TIMEOUT_S, max_retries=0), model
     raise ValueError(f"unknown provider {provider!r}")
 
 
