@@ -38,6 +38,13 @@ def _client(provider: str):
             raise RuntimeError("OPENAI_API_KEY is not set")
         model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
         return OpenAI(api_key=key, timeout=TIMEOUT_S, max_retries=0), model
+    if provider == "gemini":  # Google's OpenAI-compatible endpoint (unverified until a key is tested)
+        key = os.environ.get("GEMINI_API_KEY")
+        if not key:
+            raise RuntimeError("GEMINI_API_KEY is not set")
+        model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+        return OpenAI(base_url="https://generativelanguage.googleapis.com/v1beta/openai/", api_key=key,
+                      timeout=TIMEOUT_S, max_retries=0), model
     raise ValueError(f"unknown provider {provider!r}")
 
 

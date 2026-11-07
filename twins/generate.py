@@ -46,7 +46,7 @@ def _gen_one(name: str, fn: str, system: str, user: str, root: Path) -> Version:
         text, model = llm.complete("meta", system, user)
     else:
         text = model = None
-        for provider in ("subq", "openai"):  # a different model family from Twin A, if configured
+        for provider in ("subq", "openai", "gemini"):  # SubQ Snap is a decision model, so it normally fails here  # a different model family from Twin A, if configured
             try:
                 text, model = llm.complete(provider, system, user)
                 break
