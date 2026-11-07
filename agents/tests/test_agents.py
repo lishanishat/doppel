@@ -166,3 +166,35 @@ def test_parse_strips_leading_mention():
     assert parse(f"@doppel-orchestrator verify mutant #17").mutant_id == 17
     assert parse(f"{addr} answer 2").kind == "answer"
     assert parse(f"{addr}").kind == "help"
+
+
+def test_ack_sent_before_prepare(monkeypatch):
+    """The 'Got it.' ack must go out before the slow GitHub prepare() runs; no second ack after."""
+    import asyncio
+    monkeypatch.setenv("ORCHESTRATOR_SEED_PHRASE", "test seed phrase for ordering test")
+    monkeypatch.setenv("TWINS_IN_PROCESS", "1")
+    from agents import orchestrator, pipeline
+    from uagents_core.contrib.protocols.chat import ChatMessage, TextContent
+    from datetime import datetime, timezone
+    from uuid import uuid4
+    events = []
+
+    class Ctx:
+        class logger:
+            error = warning = info = staticmethod(lambda *a, **k: None)
+        async def send(self, to, m):
+            t = " ".join(c.text for c in getattr(m, "content", []) if isinstance(c, TextContent))
+            events.append(("send", t))
+
+    def fake_prepare(cmd):
+        events.append(("prepare", ""))
+        raise pipeline.UserFacingError("boom")
+
+    monkeypatch.setattr(pipeline, "prepare", fake_prepare)
+    msg = ChatMessage(timestamp=datetime.now(tz=timezone.utc), msg_id=uuid4(),
+                      content=[TextContent(type="text", text="verify pr #2")])
+    asyncio.run(orchestrator._on_chat(Ctx(), "user", msg))
+    kinds = [k for k, _ in events]
+    assert kinds.index("prepare") > 1  # ChatAck, then quick ack, both before prepare
+    texts = [t for k, t in events if k == "send" and t]
+    assert texts[0].startswith("Got it.") and sum(t.startswith("Got it.") for t in texts) == 1

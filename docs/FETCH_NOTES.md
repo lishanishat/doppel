@@ -22,3 +22,11 @@
 - `docs.google.com` Fetch docs and Meta cookbook aside, Meta's model is a reasoning model: tiny `max_tokens`
   can return empty content. `common/llm.py` sets no `max_tokens`.
 - Almanac contract registration warns about insufficient funds; harmless for mailbox chat.
+
+## Latency
+
+Measured against lishanishat/doppel-demo PR #2 (read-only; post_review never called), cold process:
+- `gh auth token` 0.13 s (now cached per process, thread-safe); GET PR 0.55 s; GET PR files 0.46 s; GET linked issue 0.47 s (plus one contents GET per .py file).
+- `pipeline.prepare()` before: about 2.03 s (sequential, 3 runs). After (PR + files list concurrent, file contents concurrent): about 1.3 s (1.25-1.35 s, 3 runs).
+- The Orchestrator now sends the "Got it." acknowledgement before prepare(), so time-to-ack is the message round trip only, not the GitHub time. The detailed function name / input count appear in the verdict. (Earlier 5-10 s was observed live; those runs were not re-measured here.)
+- The verify path makes no LLM calls: pipeline/github_client/engine contain no model client; twins come from `twins_cache` (an LLM is only called on a cache miss in twins/generate.py). Per-run LLM cost on the cached path: 0 tokens.

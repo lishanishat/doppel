@@ -87,13 +87,13 @@ async def _on_chat(ctx: Context, sender: str, msg: ChatMessage):
             await ctx.send(sender, _msg(reply, end=True))
             return
 
+        # Immediate ack BEFORE the slow GitHub fetches (must start with "Got it." - Coder classifies on it).
+        await ctx.send(sender, _msg(formatting.quick_ack_text(cmd), end=False))
         try:
             prep = await asyncio.to_thread(pipeline.prepare, cmd)
         except pipeline.UserFacingError as e:
             await ctx.send(sender, _msg(formatting.error_text(str(e)), end=True))
             return
-
-        await ctx.send(sender, _msg(formatting.ack_text(prep, config.max_examples()), end=False))
 
         session_id = str(uuid4())
         PENDING[session_id] = {

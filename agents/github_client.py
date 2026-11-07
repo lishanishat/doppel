@@ -5,12 +5,15 @@ import base64
 import os
 import re
 import subprocess
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
 API = "https://api.github.com"
 _token_cache: str | None = None
+_token_lock = threading.Lock()
 
 
 def _error_cls():
@@ -23,12 +26,13 @@ def _token() -> str | None:
     tok = os.environ.get("GITHUB_TOKEN")
     if tok:
         return tok
-    if _token_cache is None:
-        try:
-            out = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, timeout=10)
-            _token_cache = out.stdout.strip() if out.returncode == 0 else ""
-        except Exception:
-            _token_cache = ""
+    with _token_lock:  # one `gh auth token` per process, even with concurrent fetches
+        if _token_cache is None:
+            try:
+                out = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, timeout=10)
+                _token_cache = out.stdout.strip() if out.returncode == 0 else ""
+            except Exception:
+                _token_cache = ""
     return _token_cache or None
 
 
@@ -68,16 +72,16 @@ def _request(method: str, path: str, **kw) -> requests.Response:
 
 
 def get_pr(repo: str, n: int) -> dict:
-    pr = _request("GET", f"/repos/{repo}/pulls/{n}").json()
-    files_meta = _request("GET", f"/repos/{repo}/pulls/{n}/files", params={"per_page": 100}).json()
-    sha = pr["head"]["sha"]
-    files = []
-    for f in files_meta:
-        if not f["filename"].endswith(".py") or f.get("status") == "removed":
-            continue
-        c = _request("GET", f"/repos/{repo}/contents/{f['filename']}", params={"ref": sha}).json()
-        content = base64.b64decode(c.get("content", "")).decode("utf-8", "replace")
-        files.append({"path": f["filename"], "content": content})
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        pr_f = ex.submit(lambda: _request("GET", f"/repos/{repo}/pulls/{n}").json())
+        files_f = ex.submit(lambda: _request("GET", f"/repos/{repo}/pulls/{n}/files", params={"per_page": 100}).json())
+        pr, files_meta = pr_f.result(), files_f.result()
+        sha = pr["head"]["sha"]
+        names = [f["filename"] for f in files_meta if f["filename"].endswith(".py") and f.get("status") != "removed"]
+        contents = list(ex.map(
+            lambda fn: _request("GET", f"/repos/{repo}/contents/{fn}", params={"ref": sha}).json(), names))
+    files = [{"path": fn, "content": base64.b64decode(c.get("content", "")).decode("utf-8", "replace")}
+             for fn, c in zip(names, contents)]
     return {"body": pr.get("body") or "", "head_sha": sha, "files": files}
 
 
