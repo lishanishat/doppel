@@ -76,9 +76,9 @@ def main(argv=None):
         if not args.skip_doppel:
             row["doppel"] = _verify(m["code"], f"mutant#{mid}", args)
         if pr_files:
-            row["pr_tests"] = baselines.run_tests(m["code"], pr_files)
+            row["pr_tests"] = baselines.run_tests(m["code"], pr_files, valid_on=ref_code)
         if llm_files:
-            row["llm_tests"] = baselines.run_tests(m["code"], llm_files)
+            row["llm_tests"] = baselines.run_tests(m["code"], llm_files, valid_on=ref_code)
         res["rows"][mid] = row
         print(mid, m["description"], {k: (v.get("verdict") or v.get("status")) for k, v in row.items()
                                        if isinstance(v, dict)}, flush=True)
@@ -89,6 +89,11 @@ def main(argv=None):
         res["pr_on_reference"] = baselines.run_tests(ref_code, pr_files)
     if llm_files:
         res["llm_on_reference"] = baselines.run_tests(ref_code, llm_files)
+    res["test_counts"] = {}
+    for key, files in (("pr_tests", pr_files), ("llm_tests", llm_files)):
+        if files:
+            node, _ = baselines._node_results(ref_code, files, 60.0)
+            res["test_counts"][key] = {"total": len(node), "valid": sum(v == "PASSED" for v in node.values())}
 
     (ROOT / "bench" / "results.json").write_text(json.dumps(res, indent=1))
     summarize(res, args)
@@ -170,7 +175,10 @@ def summarize(res, args):
     for label, key, files, ref_key in (("PR's own tests", "pr_tests", res["pr_files"], "pr_on_reference"),
                                        ("LLM blind tests", "llm_tests", res["llm_files"], "llm_on_reference")):
         if files:
-            L.append(f"{label}: files {', '.join(files)}; on the correct reference: {res[ref_key]['status']}; "
+            tot = res.get("test_counts", {}).get(key)
+            counts = (f"{tot['valid']} of {tot['total']} tests pass on the correct reference; the other "
+                      f"{tot['total'] - tot['valid']} are excluded, so they cannot count as catching a bug; ") if tot else ""
+            L.append(f"{label}: files {', '.join(files)}; {counts}"
                      f"collection/other errors on mutants: "
                      f"{sum(1 for r in rows.values() if r[key]['status'] == 'error')}.")
         else:
@@ -195,7 +203,7 @@ def summarize(res, args):
           f"- PR's own tests: `demo_target/{FN}/ai_pr/`. LLM blind tests: `bench/llm_artifacts/` "
           "(all files in the directory are run together; a mutant is caught if any test fails, a pytest timeout "
           "counts as failure, a collection error does not count as caught).",
-          "- Tests should pass on the correct reference; the run reports whether they do.", ""]
+          "- A baseline test only counts as catching a bug if it also passes on the correct reference (tests that fail on correct code are excluded and counted above).", ""]
     (ROOT / "docs" / "BENCH.md").write_text("\n".join(L))
     print("\n".join(L))
 
