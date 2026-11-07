@@ -21,4 +21,6 @@ def build_twins(spec_text: str, function_name: str, signature: str) -> list[Vers
             {"name": "twin_a", "code": code, "entrypoint": function_name, "model": "STUB", "prompt_hash": None},
             {"name": "twin_b", "code": code, "entrypoint": function_name, "model": "STUB", "prompt_hash": None},
         ]
-    raise NotImplementedError("twins.api.build_twins: real generation not wired in yet")
+    from twins.generate import generate_twins
+
+    return generate_twins(spec_text, function_name, signature)
