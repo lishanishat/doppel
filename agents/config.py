@@ -8,9 +8,11 @@ load_dotenv()
 
 ORCHESTRATOR_SEED = os.environ.get("ORCHESTRATOR_SEED_PHRASE", "")
 TWIN_BUILDER_SEED = os.environ.get("TWIN_BUILDER_SEED_PHRASE", "")
+CODER_SEED = os.environ.get("CODER_SEED_PHRASE", "")
 
 ORCHESTRATOR_PORT = 8003
 TWIN_BUILDER_PORT = 8004
+CODER_PORT = 8005
 
 
 def address_from_seed(seed: str) -> str:
