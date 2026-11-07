@@ -92,7 +92,7 @@ def verdict_text(evidence: dict, review_url: str | None = None, models: dict | N
     elif v == "BLOCKED" and ce:
         parts = [f"{icon} **BLOCKED**: the submitted code disagrees with two independent rebuilds of the same spec.",
                  f"I rebuilt this function twice from the spec alone, with two different AI models, and ran all three "
-                 f"on {n} generated inputs. They disagree on this input:"]
+                 f"on generated inputs. They disagreed after {n} input{'' if n == 1 else 's'}, on this one:"]
     else:
         parts = [f"{icon} **{v}**: {evidence.get('reason', '')}"]
 
