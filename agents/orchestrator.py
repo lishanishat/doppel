@@ -2,6 +2,7 @@
 import asyncio
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -57,7 +58,18 @@ async def _finish(ctx: Context, session_id: str, twins: list):
     except Exception as e:
         ctx.logger.error(f"run failed: {e!r}")
         text = formatting.error_text(str(e) or repr(e))
-    await ctx.send(sender, _msg(text, end=True))
+    msg = _msg(text, end=True)
+    try:
+        if os.environ.get("DOPPEL_CARDS") == "1" and isinstance(evidence, dict):
+            from agents.cards import verdict_card
+
+            m = re.search(r"^Review: (\S+)", text, re.M)
+            card = verdict_card(evidence, m.group(1) if m else None)
+            if card is not None:
+                msg.content.insert(1, card)  # after TextContent, before EndSessionContent
+    except Exception as e:
+        ctx.logger.warning(f"card skipped: {e!r}")
+    await ctx.send(sender, msg)
 
 
 async def _build_in_process(prep) -> list:
