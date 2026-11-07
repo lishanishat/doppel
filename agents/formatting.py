@@ -44,33 +44,33 @@ def _input_line(inp: dict) -> str:
 
 
 def verdict_text(evidence: dict, review_url: str | None = None) -> str:
+    """Markdown with blank-line paragraphs and bullet lists: ASI:One collapses single newlines."""
     v = evidence.get("verdict", "UNPROVEN")
+    icon = _ICON.get(v, "")
     if v == "VERIFIED":
-        lines = [f"{_ICON.get(v, '')} **VERIFIED on {evidence.get('n_inputs', 0)} inputs**: all three versions agree "
-                 "and every active rule holds. This is evidence on the inputs tested, not a proof of correctness."]
+        parts = [f"{icon} **VERIFIED on {evidence.get('n_inputs', 0)} inputs**: all three versions agree and every "
+                 "active rule holds. This is evidence on the inputs tested, not a proof of correctness."]
     else:
-        lines = [f"{_ICON.get(v, '')} **{v}**: {evidence.get('reason', '')}"]
+        parts = [f"{icon} **{v}**: {evidence.get('reason', '')}"]
 
     ce = evidence.get("counterexample")
     q = evidence.get("question")
     if v == "BLOCKED" and ce:
-        lines.append(f"Input: {_input_line(ce['input'])}")
+        parts.append(f"**Counterexample:** {_input_line(ce['input'])}")
         maj = set(ce.get("majority") or [])
+        rows = []
         for name in _ORDER:
             if name in ce["outputs"]:
-                mark = "✓" if name in maj else "✗"
-                lines.append(f"{mark} {_LABEL[name]}: {_val(ce['outputs'][name])}")
-        lines.append(f"Vote: {ce.get('vote', '')}")
+                rows.append(f"- {'✓' if name in maj else '✗'} {_LABEL[name]}: {_val(ce['outputs'][name])}")
+        parts.append("\n".join(rows))
+        parts.append(f"Vote: {ce.get('vote', '')}")
     elif v == "QUESTION" and q:
-        lines.append(f"**{q['text']}**")
-        lines.append(f"Input: {_input_line(q['input'])}")
-        for i, name in enumerate(_ORDER, 1):
-            if name in q["options"]:
-                lines.append(f"{i}. {_LABEL[name]} says {_val(q['options'][name])}")
-        lines.append("Reply answer 1, answer 2 or answer 3.")
+        parts.append(f"**{q['text']}**")
+        parts.append(f"Input: {_input_line(q['input'])}")
+        parts.append("\n".join(f"{i}. {_LABEL[name]} says {_val(q['options'][name])}"
+                              for i, name in enumerate(_ORDER, 1) if name in q["options"]))
+        parts.append("Reply answer 1, answer 2 or answer 3.")
 
     if review_url:
-        lines.append(f"Review: {review_url}")
-    if v in ("BLOCKED", "UNPROVEN") and evidence.get("repro_cmd"):
-        lines.append(f"Repro: {evidence['repro_cmd']}")
-    return "\n".join(lines)
+        parts.append(f"Review: {review_url}")
+    return "\n\n".join(parts)
