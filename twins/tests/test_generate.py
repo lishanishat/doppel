@@ -37,6 +37,7 @@ def test_header_cache_and_manifest(tmp_path, monkeypatch):
 
 
 def test_subq_failure_falls_back_to_meta(tmp_path, monkeypatch):
+    monkeypatch.setenv("TWIN_B_PROVIDERS", "gemini,openai,meta2")
     calls = []
 
     def complete(provider, system, user, temperature=0.0):
@@ -58,6 +59,7 @@ def test_prompts_contain_only_spec_and_signature():
 
 
 def test_openai_used_for_twin_b_when_subq_down(tmp_path, monkeypatch):
+    monkeypatch.setenv("TWIN_B_PROVIDERS", "gemini,openai,meta2")
     def complete(provider, system, user, temperature=0.0):
         if provider in ("gemini", "meta2"):
             raise RuntimeError("down")

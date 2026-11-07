@@ -1,139 +1,108 @@
 # model: meta/muse-wonder-1.0
-# prompt_sha256: bf1669c7b46fe071e97593a8192fb133f15471cd612a2e93a526550ca885d411
-# generated_utc: 2026-11-07T21:47:19Z
-import datetime
+# prompt_sha256: a7f280c0d46490accfae019f16a9031d15566696be0cc5ca5f553f079acd1a1b
+# generated_utc: 2026-11-07T22:01:59Z
+from datetime import date, timedelta
+from decimal import Decimal, ROUND_HALF_UP
 
 
-def _parse_price_to_cents(price):
+def prorate_refund(price: str, period_start: str, period_end: str, cancel_date: str) -> str:
     if not isinstance(price, str):
         raise ValueError("invalid price")
     if price == "":
         raise ValueError("invalid price")
 
-    seen_dot = False
+    dot_seen = False
     digits_before_dot = 0
     digits_after_dot = 0
-
+    digits_seen = 0
     for ch in price:
         if ch == ".":
-            if seen_dot:
+            if dot_seen:
                 raise ValueError("invalid price")
-            seen_dot = True
-        elif "0" <= ch <= "9":
-            if seen_dot:
+            dot_seen = True
+        elif ch >= "0" and ch <= "9":
+            digits_seen += 1
+            if dot_seen:
                 digits_after_dot += 1
             else:
                 digits_before_dot += 1
         else:
             raise ValueError("invalid price")
 
+    if digits_seen == 0:
+        raise ValueError("invalid price")
     if digits_before_dot == 0:
         raise ValueError("invalid price")
-    if seen_dot and digits_after_dot == 0:
+    if dot_seen and digits_after_dot == 0:
         raise ValueError("invalid price")
-    if digits_after_dot > 2:
+    if dot_seen and digits_after_dot > 2:
         raise ValueError("invalid price")
-
-    whole_value = 0
-    index = 0
-    while index < len(price) and price[index] != ".":
-        digit = ord(price[index]) - ord("0")
-        whole_value = whole_value * 10 + digit
-        index += 1
-
-    cents = whole_value * 100
-
-    if seen_dot:
-        first_fraction_index = index + 1
-        first_digit = ord(price[first_fraction_index]) - ord("0")
-        if digits_after_dot == 1:
-            cents += first_digit * 10
-        else:
-            second_digit = ord(price[first_fraction_index + 1]) - ord("0")
-            cents += first_digit * 10 + second_digit
-
-    return cents
-
-
-def _parse_iso_date(value):
-    if not isinstance(value, str):
-        raise ValueError("invalid date")
-    if len(value) != 10:
-        raise ValueError("invalid date")
-    if value[4] != "-" or value[7] != "-":
-        raise ValueError("invalid date")
-
-    for index in range(len(value)):
-        if index == 4 or index == 7:
-            continue
-        ch = value[index]
-        if ch < "0" or ch > "9":
-            raise ValueError("invalid date")
-
-    year = int(value[0:4])
-    month = int(value[5:7])
-    day = int(value[8:10])
 
     try:
-        return datetime.date(year, month, day)
-    except ValueError:
-        raise ValueError("invalid date") from None
+        price_value = Decimal(price)
+    except Exception:
+        raise ValueError("invalid price")
 
+    if price_value < Decimal("0"):
+        raise ValueError("invalid price")
 
-def prorate_refund(price: str, period_start: str, period_end: str, cancel_date: str) -> str:
-    price_cents = _parse_price_to_cents(price)
-    start = _parse_iso_date(period_start)
-    end = _parse_iso_date(period_end)
-    cancel = _parse_iso_date(cancel_date)
+    def parse_date(value):
+        if not isinstance(value, str):
+            raise ValueError("invalid date")
+        if len(value) != 10:
+            raise ValueError("invalid date")
+        if value[4] != "-":
+            raise ValueError("invalid date")
+        if value[7] != "-":
+            raise ValueError("invalid date")
+        index = 0
+        for ch in value:
+            if index == 4 or index == 7:
+                index += 1
+                continue
+            if ch < "0" or ch > "9":
+                raise ValueError("invalid date")
+            index += 1
+        year_text = value[0:4]
+        month_text = value[5:7]
+        day_text = value[8:10]
+        try:
+            parsed = date(int(year_text), int(month_text), int(day_text))
+        except Exception:
+            raise ValueError("invalid date")
+        return parsed
 
-    if end <= start:
+    start_day = parse_date(period_start)
+    end_day = parse_date(period_end)
+    cancel_day = parse_date(cancel_date)
+
+    if end_day <= start_day:
         raise ValueError("period_end must be after period_start")
 
-    one_day = datetime.timedelta(days=1)
-
     total_days = 0
-    current = start
-    while current < end:
+    used_days = 0
+    unused_days = 0
+    one_day = timedelta(days=1)
+    current_day = start_day
+    while current_day < end_day:
         total_days += 1
-        current = current + one_day
-
-    if cancel >= end:
-        return "0.00"
-
-    if cancel < start:
-        used_days = 0
-        unused_days = 0
-        current = start
-        while current < end:
-            unused_days += 1
-            current = current + one_day
-    else:
-        used_days = 0
-        current = start
-        while current <= cancel:
+        if current_day <= cancel_day:
             used_days += 1
-            current = current + one_day
-
-        unused_days = 0
-        current = cancel + one_day
-        while current < end:
+        else:
             unused_days += 1
-            current = current + one_day
+        current_day = current_day + one_day
 
-    if unused_days == 0 or price_cents == 0:
-        refund_cents = 0
-    else:
-        numerator = price_cents * unused_days
-        quotient, remainder = divmod(numerator, total_days)
-        doubled_remainder = remainder + remainder
-        if doubled_remainder >= total_days:
-            quotient += 1
-        refund_cents = quotient
+    if total_days == 0:
+        raise ValueError("period_end must be after period_start")
 
-    if refund_cents < 0:
-        refund_cents = 0
-    if refund_cents > price_cents:
-        refund_cents = price_cents
+    refund_value = price_value * Decimal(unused_days) / Decimal(total_days)
+    refund_rounded = refund_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-    dollars, cents_part = divmod(refund_cents, 100)
-    return f"{dollars}.{cents_part:02d}"
+    if refund_rounded < Decimal("0.00"):
+        refund_rounded = Decimal("0.00")
+
+    full_price_rounded = price_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    if refund_rounded > full_price_rounded:
+        refund_rounded = full_price_rounded
+
+    return str(refund_rounded)

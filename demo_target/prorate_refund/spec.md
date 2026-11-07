@@ -20,12 +20,14 @@ The refund as a decimal string with exactly 2 decimal places, such as `"14.50"`.
 2. Invalid input raises `ValueError`: a malformed or unparseable price or date, a negative price,
    more than 2 decimal places in the price, or a `period_end` that is not after `period_start`.
 3. If `cancel_date` is on or after `period_end`, nothing is left unused and the refund is `"0.00"`.
-4. If `cancel_date` is inside the period (`period_start <= cancel_date < period_end`), the customer
+4. If `cancel_date` is before `period_start`, the customer cancelled before the period began and the
+   full `price` is refunded.
+5. If `cancel_date` is inside the period (`period_start <= cancel_date < period_end`), the customer
    has used every day from `period_start` up to and including `cancel_date`.
    `unused_days = total_days - used_days`.
-5. `refund = price * unused_days / total_days`, rounded to the nearest cent, with exact halves
+6. `refund = price * unused_days / total_days`, rounded to the nearest cent, with exact halves
    rounded up. Do not use binary floating point for money.
-6. A refund is never negative and never more than the price.
+7. A refund is never negative and never more than the price.
 
 ## Examples
 | price | period_start | period_end | cancel_date | refund |
@@ -36,3 +38,4 @@ The refund as a decimal string with exactly 2 decimal places, such as `"14.50"`.
 | `"29.00"` | `2028-02-01` | `2028-03-01` | `2028-02-28` | `"1.00"` |
 | `"29.00"` | `2028-02-01` | `2028-03-01` | `2028-02-29` | `"0.00"` |
 | `"30.00"` | `2026-04-01` | `2026-05-01` | `2026-05-01` | `"0.00"` |
+| `"30.00"` | `2026-04-01` | `2026-05-01` | `2026-03-25` | `"30.00"` |

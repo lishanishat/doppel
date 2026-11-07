@@ -31,9 +31,9 @@ def prorate_refund(price: str, period_start: str, period_end: str, cancel_date: 
 
     if cancel >= end:
         return "0.00"
-    used_days = (cancel - start).days + 1 if cancel >= start else None
-    if used_days is None:
-        raise ValueError("cancel_date is before period_start")  # reference's own choice; spec is silent
+    if cancel < start:
+        return f"{p:.2f}"  # cancelled before the period began: full refund
+    used_days = (cancel - start).days + 1
     unused_days = total_days - used_days
 
     refund = (p * unused_days / total_days).quantize(_CENT, rounding=ROUND_HALF_UP)

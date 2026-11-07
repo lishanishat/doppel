@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,7 +47,7 @@ def _gen_one(name: str, fn: str, system: str, user: str, root: Path) -> Version:
         text, model = llm.complete("meta", system, user)
     else:
         text = model = None
-        for provider in ("gemini", "openai", "meta2"):  # prefer another vendor; else a different Meta model line  # a different model family from Twin A, if configured
+        for provider in os.environ.get("TWIN_B_PROVIDERS", "meta2").split(","):  # e.g. "gemini,openai,meta2"  # a different model family from Twin A, if configured
             try:
                 text, model = llm.complete(provider, system, user)
                 break

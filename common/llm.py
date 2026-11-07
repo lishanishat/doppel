@@ -48,7 +48,7 @@ def _client(provider: str):
         key = os.environ.get("GEMINI_API_KEY")
         if not key:
             raise RuntimeError("GEMINI_API_KEY is not set")
-        model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+        model = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
         return OpenAI(base_url="https://generativelanguage.googleapis.com/v1beta/openai/", api_key=key,
                       timeout=TIMEOUT_S, max_retries=0), model
     raise ValueError(f"unknown provider {provider!r}")
