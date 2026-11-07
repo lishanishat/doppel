@@ -1,5 +1,20 @@
 # Project context: Doppel (AIE Code Summit 2026 hackathon, Fetch.ai track) — v2
 
+## FINAL STATE (v3, Nov 7 ~3 pm): supersedes the plan below where they differ
+
+- Both twins are Meta: Twin A `meta/muse-spark-1.3`, Twin B `meta/muse-wonder-1.0` (deliberately naive). SubQ Snap is a decision model that cannot write code, and the OpenAI/Gemini keys did not work in time. No Subquadratic usage, one model vendor.
+- Spec gap closed: cancel before period start = full refund.
+- QUESTION demo dropped (no natural trigger in the demo function); the path is built and unit-tested.
+- A Coder agent exists: it submits its PR to the Orchestrator and logs each step.
+- Chaos/recovery test added (`--chaos`): a killed version yields UNPROVEN with a plain-English reason.
+- PR #2 (doppel-demo) is correct and comes back VERIFIED; PR #3 has one auto-injected mutation and comes back BLOCKED.
+- Benchmark (docs/BENCH.md), 15 held-out mutants: Doppel 15/15 (100%), PR's own tests 13/15 (87%), LLM blind tests 15/15 (100%).
+- Honest note: blind tests tie Doppel on this function; we match them, we do not beat them.
+- No false alarm on the correct reference; about 0.4 s per run with cached twins.
+- The Orchestrator runs locally on a laptop with an Agentverse mailbox.
+
+---
+
 This file hands off everything decided in planning (claude.ai, 9:11–11:23 am, then Claude Code,
 11:30 am–12:02 pm Pacific, Saturday Nov 7, 2026). **Read all of it before writing code.**
 v1 of this file is saved as `CLAUDE.v1-backup.md`; this version supersedes it.
