@@ -1,0 +1,72 @@
+[
+ {
+  "impl": "impl_1",
+  "model": "claude-sonnet-5-5",
+  "buggy_vs_reference": 0,
+  "example_mismatch": null,
+  "example_outputs": null,
+  "doppel": "VERIFIED",
+  "doppel_reason": "VERIFIED on 921 inputs: all versions agree and all active rules hold.",
+  "doppel_secs": 0.7,
+  "counterexample": null,
+  "own_tests_caught": false,
+  "own_tests_detail": "no valid test failed (of 21; tests failing on the reference are excluded)",
+  "blind_tests_caught": false
+ },
+ {
+  "impl": "impl_2",
+  "model": "claude-sonnet-5-5",
+  "buggy_vs_reference": 0,
+  "example_mismatch": null,
+  "example_outputs": null,
+  "doppel": "VERIFIED",
+  "doppel_reason": "VERIFIED on 921 inputs: all versions agree and all active rules hold.",
+  "doppel_secs": 0.8,
+  "counterexample": null,
+  "own_tests_caught": false,
+  "own_tests_detail": "no valid test failed (of 20; tests failing on the reference are excluded)",
+  "blind_tests_caught": false
+ },
+ {
+  "impl": "impl_3",
+  "model": "claude-haiku-5-5",
+  "buggy_vs_reference": 0,
+  "example_mismatch": null,
+  "example_outputs": null,
+  "doppel": "VERIFIED",
+  "doppel_reason": "VERIFIED on 921 inputs: all versions agree and all active rules hold.",
+  "doppel_secs": 0.62,
+  "counterexample": null,
+  "own_tests_caught": false,
+  "own_tests_detail": "no valid test failed (of 24; tests failing on the reference are excluded)",
+  "blind_tests_caught": false
+ },
+ {
+  "impl": "impl_4",
+  "model": "claude-haiku-5-5",
+  "buggy_vs_reference": 0,
+  "example_mismatch": null,
+  "example_outputs": null,
+  "doppel": "VERIFIED",
+  "doppel_reason": "VERIFIED on 921 inputs: all versions agree and all active rules hold.",
+  "doppel_secs": 0.64,
+  "counterexample": null,
+  "own_tests_caught": false,
+  "own_tests_detail": "no valid test failed (of 23; tests failing on the reference are excluded)",
+  "blind_tests_caught": false
+ },
+ {
+  "impl": "impl_5",
+  "model": "claude-opus-5-5",
+  "buggy_vs_reference": 0,
+  "example_mismatch": null,
+  "example_outputs": null,
+  "doppel": "VERIFIED",
+  "doppel_reason": "VERIFIED on 921 inputs: all versions agree and all active rules hold.",
+  "doppel_secs": 0.62,
+  "counterexample": null,
+  "own_tests_caught": false,
+  "own_tests_detail": "no valid test failed (of 22; tests failing on the reference are excluded)",
+  "blind_tests_caught": false
+ }
+]

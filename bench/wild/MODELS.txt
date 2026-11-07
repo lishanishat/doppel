@@ -1,0 +1,5 @@
+impl_1=claude-sonnet-5-5
+impl_2=claude-sonnet-5-5
+impl_3=claude-haiku-5-5
+impl_4=claude-haiku-5-5
+impl_5=claude-opus-5-5
