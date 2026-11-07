@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import os
+import re
 import subprocess
 import time
 
@@ -39,13 +40,21 @@ def _headers() -> dict:
     return h
 
 
+def _friendly_404(path: str) -> str:
+    m = re.match(r"/repos/([^/]+/[^/]+)/(pulls|issues)/(\d+)", path)
+    if m:
+        kind = "PR" if m.group(2) == "pulls" else "Issue"
+        return f"{kind} #{m.group(3)} was not found in {m.group(1)} on GitHub."
+    return f"Not found on GitHub: {path}"
+
+
 def _request(method: str, path: str, **kw) -> requests.Response:
     last: Exception | None = None
     for attempt in range(3):
         try:
             r = requests.request(method, API + path, headers=_headers(), timeout=20, **kw)
             if r.status_code == 404:
-                raise _error_cls()(f"GitHub says not found: {path}")
+                raise _error_cls()(_friendly_404(path))
             if r.status_code >= 500 or r.status_code == 429:
                 last = RuntimeError(f"GitHub HTTP {r.status_code}")
             else:

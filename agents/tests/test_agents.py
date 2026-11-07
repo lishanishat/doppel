@@ -62,7 +62,7 @@ def test_formatting_fixtures(name):
 
 def test_blocked_content():
     t = formatting.verdict_text(fx("blocked"), "http://rev")
-    assert "✗ PR: `0.00`" in t and "✓ Twin A: `1.03`" in t and "Vote: 2-1" in t and "http://rev" in t
+    assert "✗ PR: 0.00" in t and "✓ Twin A: 1.03" in t and "Vote: 2-1" in t and "http://rev" in t
 
 
 def test_question_content():
