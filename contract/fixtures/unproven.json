@@ -1,0 +1,14 @@
+{
+  "verdict": "UNPROVEN",
+  "reason": "twin_b failed to run (FIXTURE): not enough evidence.",
+  "n_inputs": 0,
+  "counterexample": null,
+  "question": null,
+  "rules": [],
+  "flaky_excluded": 0,
+  "regression_tests": 0,
+  "seed": 0,
+  "timings": {"total_s": 0.8},
+  "ledger_path": "ledgers/FIXTURE.json",
+  "repro_cmd": "python -m engine.cli verify --fixture unproven"
+}

@@ -1,0 +1,8 @@
+{
+  "id": 17,
+  "split": "heldout",
+  "operator": "flip_comparison",
+  "description": "FIXTURE: line 14 '<=' -> '<'",
+  "code": "def prorate_refund(price, period_start, period_end, cancel_date):\n    return \"0.00\"\n",
+  "entrypoint": "prorate_refund"
+}

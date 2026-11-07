@@ -1,0 +1,16 @@
+{
+  "verdict": "VERIFIED",
+  "reason": "All three versions agree on 2000 inputs and all active rules hold (FIXTURE).",
+  "n_inputs": 2000,
+  "counterexample": null,
+  "question": null,
+  "rules": [
+    {"name": "refund_never_negative", "spec_line": "A refund is never negative.", "status": "active", "passed": true}
+  ],
+  "flaky_excluded": 0,
+  "regression_tests": 0,
+  "seed": 0,
+  "timings": {"total_s": 5.1},
+  "ledger_path": "ledgers/FIXTURE.json",
+  "repro_cmd": "python -m engine.cli verify --fixture verified"
+}

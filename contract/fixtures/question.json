@@ -1,0 +1,23 @@
+{
+  "verdict": "QUESTION",
+  "reason": "All three versions disagree on a confirmed input; the spec is likely ambiguous (FIXTURE).",
+  "n_inputs": 2000,
+  "counterexample": null,
+  "question": {
+    "id": "q-fixture-1",
+    "text": "If a customer cancels on a given day, does that day count as used?",
+    "input": {"price": "30.00", "period_start": "2026-04-01", "period_end": "2026-05-01", "cancel_date": "2026-04-16"},
+    "options": {
+      "pr": {"ok": true, "value": "15.00"},
+      "twin_a": {"ok": true, "value": "14.00"},
+      "twin_b": {"ok": true, "value": "15.50"}
+    }
+  },
+  "rules": [],
+  "flaky_excluded": 0,
+  "regression_tests": 0,
+  "seed": 0,
+  "timings": {"total_s": 3.9},
+  "ledger_path": "ledgers/FIXTURE.json",
+  "repro_cmd": "python -m engine.cli verify --fixture question"
+}

@@ -1,0 +1,25 @@
+{
+  "verdict": "BLOCKED",
+  "reason": "PR outvoted 2-1 on a confirmed input (FIXTURE - not a real result).",
+  "n_inputs": 2000,
+  "counterexample": {
+    "input": {"price": "30.00", "period_start": "2028-02-01", "period_end": "2028-03-01", "cancel_date": "2028-02-29"},
+    "outputs": {
+      "pr": {"ok": true, "value": "0.00"},
+      "twin_a": {"ok": true, "value": "1.03"},
+      "twin_b": {"ok": true, "value": "1.03"}
+    },
+    "vote": "2-1",
+    "majority": ["twin_a", "twin_b"]
+  },
+  "question": null,
+  "rules": [
+    {"name": "refund_never_negative", "spec_line": "A refund is never negative.", "status": "active", "passed": true}
+  ],
+  "flaky_excluded": 0,
+  "regression_tests": 0,
+  "seed": 0,
+  "timings": {"total_s": 4.2},
+  "ledger_path": "ledgers/FIXTURE.json",
+  "repro_cmd": "python -m engine.cli verify --fixture blocked"
+}
