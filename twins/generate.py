@@ -9,9 +9,11 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from common import llm
-from contract.types import Version
-from twins import prompts
+os.environ.setdefault("LLM_TIMEOUT_S", "240")  # per-call timeout; read by common.llm at import
+
+from common import llm  # noqa: E402
+from contract.types import Version  # noqa: E402
+from twins import prompts  # noqa: E402
 
 CACHE_ROOT = Path(__file__).resolve().parent.parent / "twins_cache"
 _BLOCK = re.compile(r"```(?:python|py)?[ \t]*\n(.*?)```", re.DOTALL | re.IGNORECASE)
@@ -47,7 +49,7 @@ def _gen_one(name: str, fn: str, system: str, user: str, root: Path) -> Version:
         text, model = llm.complete("meta", system, user)
     else:
         text = model = None
-        for provider in os.environ.get("TWIN_B_PROVIDERS", "meta2").split(","):  # e.g. "gemini,openai,meta2"  # a different model family from Twin A, if configured
+        for provider in os.environ.get("TWIN_B_PROVIDERS", "gemini,meta2").split(","):  # e.g. "gemini,openai,meta2"  # a different model family from Twin A, if configured
             try:
                 text, model = llm.complete(provider, system, user)
                 break
@@ -63,9 +65,16 @@ def _gen_one(name: str, fn: str, system: str, user: str, root: Path) -> Version:
 
 def generate_twins(spec_text: str, function_name: str, signature: str, cache_root: Path | None = None) -> list[Version]:
     root = Path(cache_root) if cache_root else CACHE_ROOT
-    a = _gen_one("twin_a", function_name, *prompts.twin_a_prompt(spec_text, signature), root)
-    b = _gen_one("twin_b", function_name, *prompts.twin_b_prompt(spec_text, signature), root)
+    if not function_name.isidentifier():
+        raise ValueError(f"invalid function name {function_name!r}")
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=2) as ex:  # wall time = slower of the two
+        fa = ex.submit(_gen_one, "twin_a", function_name, *prompts.twin_a_prompt(spec_text, signature), root)
+        fb = ex.submit(_gen_one, "twin_b", function_name, *prompts.twin_b_prompt(spec_text, signature), root)
+        a, b = fa.result(), fb.result()
     manifest = {v["name"]: {"model": v["model"], "prompt_hash": v["prompt_hash"]} for v in (a, b)}
+    (root / function_name).mkdir(parents=True, exist_ok=True)
     (root / function_name / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return [a, b]
 
