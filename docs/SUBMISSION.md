@@ -14,6 +14,8 @@ You give Doppel a pull request in ASI:One chat. It reads the PR and the linked i
 
 Measured: on 15 held-out, automatically generated mutants, Doppel caught 15/15, the PR's own tests 13/15, and LLM-written blind tests 15/15. We match blind tests, we do not beat them. No false alarm on the correct reference. On 5 independent AI implementations from 3 Claude models, Doppel returned VERIFIED for all 5 (all correct; no false alarms).
 
+Bring-your-own function: paste a spec plus a Python function into the chat and Doppel generates test inputs and both rebuilds live (about 1.5 to 5 minutes), no setup per function.
+
 Honest limits: the twins come from two vendors but shared mistakes are still possible; one function with a written spec; "VERIFIED on N inputs" is evidence, not proof; the QUESTION path is built and tested but has no natural demo trigger; the Orchestrator runs on a laptop behind an Agentverse mailbox.
 
 ## Built with

@@ -50,7 +50,9 @@ submits its own PR to the Orchestrator over the chat protocol and logs each step
 `verify pr #3`, override with `CODER_SUBMIT_TEXT`). The Twin builder's address is
 `agent1q0kqwvkmemtmpxeu2l56yt9qgc9p07q4legc98t9rlqxrcd9hxgawqlnk8c`.
 
-PR #3 in `doppel-demo` is the AI-written code plus one automatically injected mutation. The demo target lives in a separate public repo: https://github.com/lishanishat/doppel-demo (issue #1 is the spec).
+PR #3 in `doppel-demo` is the AI-written code plus one automatically injected mutation. - `verify custom` + a spec + a Python function: **bring your own function** (live). Doppel asks Meta to write test inputs, then Meta and Gemini rebuild your function from your spec, then compares all three. Takes about 1.5 to 5 minutes. Scope: pure Python (standard library) functions with JSON-able arguments and return values. Format and examples: `docs/CUSTOM.md`, `examples/custom/`; run it without ASI:One with `python scripts/custom_check.py FILE`.
+
+The demo target lives in a separate public repo: https://github.com/lishanishat/doppel-demo (issue #1 is the spec).
 
 ## Benchmark (measured, 15 held-out mutants)
 
