@@ -52,7 +52,7 @@ def test_custom_flow_happy(monkeypatch):
     ev = _setup(monkeypatch, lambda *a, **k: [{"a": 1}, {"a": 2}])
     texts = [e for e in ev if e[0] == "send"]
     assert texts[0][1] == "Got it. f" and not texts[0][2]
-    assert any("Step 1/3 done: 2 test inputs" in t[1] for t in texts)
+    assert len(texts) == 2  # only the acknowledgement and the verdict: intermediate messages trigger ASI:One 429 rate limits
     assert ("run", [{"a": 1}, {"a": 2}], False) in ev
     assert texts[-1][1] == "VERDICT" and texts[-1][2]
     assert sum(t[2] for t in texts) == 1
