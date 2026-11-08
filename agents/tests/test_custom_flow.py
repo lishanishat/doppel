@@ -26,7 +26,7 @@ def _setup(monkeypatch, gen):
                 events.append(("send", t, any(isinstance(c, EndSessionContent) for c in m.content)))
 
     monkeypatch.setattr(commands, "parse", lambda text: SimpleNamespace(kind="verify_custom", raw=text))
-    prep = SimpleNamespace(spec_text="spec", function_name="f", signature="def f(a)", pr=SimpleNamespace(code="def f(a): return a"))
+    prep = SimpleNamespace(spec_text="spec", function_name="f", signature="def f(a)", pr={"name": "pr", "code": "def f(a): return a", "entrypoint": "f", "model": "user-submitted", "prompt_hash": None})
     monkeypatch.setattr(pipeline, "prepare_custom", lambda cmd: prep, raising=False)
     mod = types.ModuleType("engine.inputgen")
     mod.generate_inputs = gen

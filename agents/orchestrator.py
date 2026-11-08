@@ -112,7 +112,7 @@ async def _custom_flow(ctx: Context, sender: str, cmd):
             return
         from engine import inputgen
 
-        inputs = await asyncio.to_thread(inputgen.generate_inputs, prep.spec_text, prep.pr.code, prep.function_name)
+        inputs = await asyncio.to_thread(inputgen.generate_inputs, prep.spec_text, prep.pr["code"], prep.function_name)
         await ctx.send(sender, _msg(_fmt("progress_text", 1, 3, f"Step 1/3 done: {len(inputs)} test inputs", default=f"Step 1/3 done: {len(inputs)} test inputs"), end=False))
         await ctx.send(sender, _msg(_fmt("progress_text", 2, 3, "Step 2/3: two AI models are rebuilding your function from the spec", default="Step 2/3: two AI models are rebuilding your function from the spec"), end=False))
         session_id = str(uuid4())
