@@ -43,3 +43,7 @@ def max_examples() -> int:
 
 def twins_in_process() -> bool:
     return os.environ.get("TWINS_IN_PROCESS", "0") == "1"
+
+
+def llm_timeout_s() -> float:
+    return float(os.environ.get("LLM_TIMEOUT_S", "240"))
