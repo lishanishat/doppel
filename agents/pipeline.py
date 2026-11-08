@@ -95,6 +95,20 @@ def prepare(cmd: Command) -> Prepared:
     raise UserFacingError("Nothing to prepare for that command.")
 
 
+def prepare_custom(cmd: Command) -> Prepared:
+    from agents import custom  # built in parallel; import lazily
+    try:
+        req = custom.parse_custom(getattr(cmd, "raw", None) or "")
+    except ValueError as e:
+        raise UserFacingError(str(e))
+    fn = req.function_name
+    return Prepared(
+        spec_text=req.spec_text, function_name=fn, signature=req.signature,
+        pr=Version(name="pr", code=req.code, entrypoint=fn, model="user-submitted", prompt_hash=None),
+        pr_ref=f"custom:{fn}", repo=None, pr_number=None,
+    )
+
+
 def _unproven(reason: str) -> Evidence:
     return Evidence(
         verdict="UNPROVEN", reason=reason, n_inputs=0, counterexample=None, question=None,
@@ -127,6 +141,25 @@ def run(prep: Prepared, twins: list[Version], max_examples: int) -> tuple[Eviden
                     except Exception:
                         url = None
         return evidence, formatting.verdict_text(evidence, url, models)
+    except Exception as e:  # never raise
+        ev = _unproven(f"verification failed: {str(e)[:200] or type(e).__name__}")
+        return ev, formatting.verdict_text(ev, None)
+
+
+def run_custom(prep: Prepared, twins: list[Version], inputs: list[dict], max_examples: int) -> tuple[Evidence, str]:
+    try:
+        from engine import api as engine_api
+        req = {
+            "function_name": prep.function_name,
+            "spec_text": prep.spec_text,
+            "versions": [prep.pr, *twins],
+            "max_examples": max_examples,
+            "pr_ref": prep.pr_ref,
+            "inputs": inputs,
+        }
+        evidence = engine_api.verify(req)
+        models = {v.get("name"): v.get("model") for v in twins}
+        return evidence, formatting.verdict_text(evidence, None, models)
     except Exception as e:  # never raise
         ev = _unproven(f"verification failed: {str(e)[:200] or type(e).__name__}")
         return ev, formatting.verdict_text(ev, None)
