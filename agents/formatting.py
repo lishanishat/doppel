@@ -35,8 +35,29 @@ def help_text() -> str:
         "- verify pr #2\n"
         "- verify https://github.com/owner/repo/pull/7 prorate_refund\n"
         "- verify mutant #17\n"
-        "- answer 1 / 2 / 3 (after a question)"
+        "- answer 1 / 2 / 3 (after a question)\n\n"
+        "Custom mode: paste your own spec and a pure-Python function (stdlib only, JSON-able arguments and "
+        "return value) in this format:\n"
+        "verify custom\n"
+        "spec: <describe what the function must do>\n"
+        "```python\n"
+        "def my_func(a: int) -> int:\n"
+        "    ...\n"
+        "```"
     )
+
+
+def custom_ack_text(fn: str) -> str:
+    return (
+        f"Got it. `{fn}` is a new function, so I'll verify it live. This takes about 3-5 minutes.\n"
+        "Step 1/3: generate test inputs from your spec\n"
+        "Step 2/3: two different AI models rebuild the function from your spec\n"
+        "Step 3/3: compare your code against both rebuilds"
+    )
+
+
+def progress_text(step: int, total: int, msg: str) -> str:
+    return f"Step {step}/{total}: {msg}"
 
 
 def quick_ack_text(cmd) -> str:
