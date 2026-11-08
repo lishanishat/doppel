@@ -34,6 +34,7 @@ class VerifyRequest(TypedDict, total=False):
     seed: int                  # default 0
     max_examples: int          # default 2000; Fetch side lowers it to fit the ASI:One reply window
     time_budget_s: float       # default 60
+    inputs: list[dict]         # bring-your-own function: kwargs dicts (JSON-able), one per call
     pr_ref: str                # e.g. "owner/repo#2" or "mutant#17", shown in the ledger
 
 

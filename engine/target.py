@@ -35,3 +35,11 @@ def load(fn: str) -> Target:
         entrypoint=getattr(schema, "FUNCTION_NAME", fn),
         strategy=strategy_for(fn),
     )
+
+
+def from_inputs(fn: str, spec_text: str, inputs: list) -> Target:
+    """Dynamic target for a bring-your-own function: draw kwargs dicts from a fixed list (copied per draw)."""
+    import json
+    from hypothesis import strategies as st
+    return Target(spec_text=spec_text or "", reference_code="", entrypoint=fn,
+                  strategy=st.sampled_from(inputs).map(lambda d: json.loads(json.dumps(d))))

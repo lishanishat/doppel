@@ -66,8 +66,12 @@ def _pipeline(req, state, run_id):
     if set(by) != {"pr", "twin_a", "twin_b"}:
         return "UNPROVEN", "Request must contain exactly the versions pr, twin_a, twin_b.", None, None
     from engine import target as target_mod
+    inputs = req.get("inputs")
     try:
-        target = target_mod.load(fn)
+        if isinstance(inputs, list) and inputs and not (target_mod.ROOT / "demo_target" / fn).is_dir():
+            target = target_mod.from_inputs(fn, req.get("spec_text", ""), inputs)
+        else:
+            target = target_mod.load(fn)
     except Exception as e:
         return "UNPROVEN", f"Function out of scope (no demo target for '{fn}'): {e}", None, None
     from engine.harness import BuildError, Runner

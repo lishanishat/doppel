@@ -115,6 +115,8 @@ def evaluate(fn: str, samples: list[dict], versions_outputs: Optional[dict] = No
     """-> list[contract.RuleResult]. `passed` = the PR holds the rule on every sample.
     Samples: [{"input": kwargs, "outputs": {version: result}}]. versions_outputs (optional) maps
     version -> list of results aligned with samples, overriding sample outputs."""
+    if fn not in RULES:
+        return []
     spec = spec if spec is not None else spec_text(fn)
     out = []
     for rule in RULES.get(fn, []):
