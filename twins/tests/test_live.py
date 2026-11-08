@@ -24,7 +24,7 @@ def test_parallel_any_function_and_fallback(tmp_path, monkeypatch):
     t0 = time.time()
     a, b = generate.generate_twins("spec", "my_fn", "def my_fn(x)", tmp_path)
     assert time.time() - t0 < 0.8  # parallel ~0.6s, serial ~0.9s
-    assert "gemini" in seen and b["model"] == "meta2/m".replace("meta2", "meta")
+    assert "gemini" in seen and b["model"] == "meta2/m"
     assert f"# model: {b['model']}" in (tmp_path / "my_fn" / "twin_b.py").read_text()
     assert (tmp_path / "my_fn" / "manifest.json").exists()
 
