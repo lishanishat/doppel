@@ -1,0 +1,18 @@
+verify custom
+spec: business_days_between(start, end) counts the Monday-Friday days from start (inclusive) to end (exclusive). Both arguments are ISO dates (YYYY-MM-DD). Saturdays and Sundays are never counted; public holidays are ignored. If end is on or before start the result is 0. Invalid dates raise ValueError.
+```python
+from datetime import date, timedelta
+
+def business_days_between(start: str, end: str) -> int:
+    s = date.fromisoformat(start)
+    e = date.fromisoformat(end)
+    if e <= s:
+        return 0
+    count = 0
+    d = s
+    while d <= e:
+        if d.weekday() < 5:
+            count += 1
+        d += timedelta(days=1)
+    return count
+```

@@ -1,0 +1,20 @@
+verify custom
+spec: apply_discounts(price, percents) applies percentage discounts one after another to a decimal price. price is a non-negative decimal string such as "19.99"; percents is a list of numbers, each between 0 and 100 inclusive, applied in order (each to the running price). Rounding happens only once, at the END: round half up to 2 decimal places, and return the result as a string with exactly 2 decimals, e.g. "8.14". The result is never below "0.00". A negative percent, a percent above 100, or an invalid or negative price raises ValueError. An empty list returns the price rounded to cents.
+```python
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+
+def apply_discounts(price: str, percents: list) -> str:
+    try:
+        p = Decimal(price)
+    except (InvalidOperation, TypeError):
+        raise ValueError("invalid price")
+    if not p.is_finite() or p < 0:
+        raise ValueError("invalid price")
+    for pct in percents:
+        d = Decimal(str(pct))
+        if d < 0 or d > 100:
+            raise ValueError("invalid percent")
+        p = (p * (Decimal(100) - d) / Decimal(100)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    p = max(p, Decimal(0))
+    return str(p.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+```

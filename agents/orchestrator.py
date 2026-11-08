@@ -51,7 +51,13 @@ async def _finish(ctx: Context, session_id: str, twins: list):
         delay = float(os.environ.get("DEBUG_DELAY_S", "0"))  # test-only: simulate a slow verification
         if delay:
             await asyncio.sleep(delay)
-        evidence, text = await asyncio.to_thread(pipeline.run, prep, twins, config.max_examples())
+        if entry.get("custom"):
+            await ctx.send(sender, _msg(_fmt("progress_text", 3, 3, "Step 3/3: comparing all three versions", default="Step 3/3: comparing all three versions"), end=False))
+            evidence, text = await asyncio.to_thread(
+                pipeline.run_custom, prep, twins, entry.get("inputs"), config.max_examples()
+            )
+        else:
+            evidence, text = await asyncio.to_thread(pipeline.run, prep, twins, config.max_examples())
         q = evidence.get("question") if isinstance(evidence, dict) else None
         if evidence.get("verdict") == "QUESTION" and q:
             LAST_QUESTION[sender] = q["id"]
@@ -78,6 +84,68 @@ async def _build_in_process(prep) -> list:
     return await asyncio.to_thread(build_twins, prep.spec_text, prep.function_name, prep.signature)
 
 
+CUSTOM_TWIN_TIMEOUT_S = 420.0
+
+
+def _guess_fn(cmd) -> str:
+    m = re.search(r"^\s*def\s+(\w+)", getattr(cmd, "raw", None) or "", re.M)
+    return m.group(1) if m else "your function"
+
+
+def _fmt(name: str, *args, default: str = "") -> str:
+    fn = getattr(formatting, name, None)
+    return fn(*args) if fn else default
+
+
+async def _custom_flow(ctx: Context, sender: str, cmd):
+    """verify custom: ack -> generate inputs -> twins -> engine -> verdict. Never raises."""
+    session_id = None
+    try:
+        await ctx.send(sender, _msg(_fmt("custom_ack_text", _guess_fn(cmd), default="Got it. Verifying your new function, about 3-5 minutes."), end=False))
+        prepare = getattr(pipeline, "prepare_custom", None)
+        if prepare is None:
+            raise RuntimeError("custom mode is not available yet")
+        try:
+            prep = await asyncio.to_thread(prepare, cmd)
+        except pipeline.UserFacingError as e:
+            await ctx.send(sender, _msg(formatting.error_text(str(e)), end=True))
+            return
+        from engine import inputgen
+
+        inputs = await asyncio.to_thread(inputgen.generate_inputs, prep.spec_text, prep.pr.code, prep.function_name)
+        await ctx.send(sender, _msg(_fmt("progress_text", 1, 3, f"Step 1/3 done: {len(inputs)} test inputs", default=f"Step 1/3 done: {len(inputs)} test inputs"), end=False))
+        await ctx.send(sender, _msg(_fmt("progress_text", 2, 3, "Step 2/3: two AI models are rebuilding your function from the spec", default="Step 2/3: two AI models are rebuilding your function from the spec"), end=False))
+        session_id = str(uuid4())
+        PENDING[session_id] = {
+            "sender": sender,
+            "prep": prep,
+            "inputs": inputs,
+            "custom": True,
+            "deadline": time.monotonic() + CUSTOM_TWIN_TIMEOUT_S,
+        }
+        if config.twins_in_process():
+            twins = await _build_in_process(prep)
+            await _finish(ctx, session_id, twins)
+        else:
+            await ctx.send(
+                config.twin_builder_address(),
+                TwinRequest(
+                    session_id=session_id,
+                    spec_text=prep.spec_text,
+                    function_name=prep.function_name,
+                    signature=prep.signature,
+                ),
+            )
+    except Exception as e:
+        ctx.logger.error(f"custom flow failed: {e!r}")
+        if session_id:
+            PENDING.pop(session_id, None)
+        try:
+            await ctx.send(sender, _msg(formatting.error_text(str(e) or repr(e)), end=True))
+        except Exception:
+            pass
+
+
 @chat_proto.on_message(ChatMessage)
 async def _on_chat(ctx: Context, sender: str, msg: ChatMessage):
     await ctx.send(sender, ChatAcknowledgement(timestamp=datetime.now(), acknowledged_msg_id=msg.msg_id))
@@ -97,6 +165,10 @@ async def _on_chat(ctx: Context, sender: str, msg: ChatMessage):
             reply = await asyncio.to_thread(pipeline.answer, qid, cmd.answer)
             LAST_QUESTION.pop(sender, None)
             await ctx.send(sender, _msg(reply, end=True))
+            return
+
+        if cmd.kind == "verify_custom":
+            await _custom_flow(ctx, sender, cmd)
             return
 
         # Immediate ack BEFORE the slow GitHub fetches (must start with "Got it." - Coder classifies on it).

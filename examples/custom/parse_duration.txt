@@ -1,0 +1,14 @@
+verify custom
+spec: parse_duration(text) converts a duration string into a whole number of seconds. The text is one or more pairs of a non-negative integer followed by a unit: d (86400 s), h (3600 s), m (60 s), s (1 s), e.g. "1h30m" -> 5400, "2d" -> 172800. Units are case-insensitive and may repeat or appear in any order; the result is the sum. Empty text, a number without a unit, a unit without a number, or any unknown unit raises ValueError.
+```python
+import re
+
+def parse_duration(text: str) -> int:
+    if not re.fullmatch(r"(\d+[dhmsDHMS])+", text):
+        raise ValueError("invalid duration")
+    mult = {"d": 86400, "h": 3600, "m": 60, "s": 1}
+    total = 0
+    for num, unit in re.findall(r"(\d+)([dhmsDHMS])", text):
+        total += int(num) * mult[unit.lower()]
+    return total
+```
