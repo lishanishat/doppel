@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import Literal, Optional
 
-Kind = Literal["verify_pr", "verify_url", "verify_mutant", "answer", "help"]
+Kind = Literal["verify_pr", "verify_url", "verify_mutant", "verify_custom", "answer", "help"]
 
 _ANSWER_MAP = {
     "1": "pr", "a": "pr", "pr": "pr",
@@ -25,6 +25,7 @@ class Command:
     function_name: Optional[str] = None
     mutant_id: Optional[int] = None
     answer: Optional[str] = None
+    raw: Optional[str] = None
 
 
 def _default_repo() -> str:
@@ -36,7 +37,12 @@ def _norm_answer(s: str) -> Optional[str]:
     return _ANSWER_MAP.get(s)
 
 
+_CUSTOM_RE = re.compile(r"^\s*(?:@\S+\s*)*verify\s+custom\b", re.I)
+
+
 def parse(text: str) -> Command:
+    if _CUSTOM_RE.match(text or ""):
+        return Command("verify_custom", raw=text)
     t = re.sub(r"\s+", " ", (text or "").strip())
     # ASI:One prefixes messages with the agent's @mention/address; drop leading mentions.
     t = re.sub(r"^(?:@\S+\s*)+", "", t).strip()
